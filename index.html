@@ -7,6 +7,33 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- ==================== 취향 확인 팝업 섹션 ==================== -->
+  <!-- 사용자가 처음 사이트에 접속했을 때 표시되는 팝업 창입니다. -->
+  <!-- 사용자의 영화 취향을 파악하기 위한 질문들을 포함합니다. -->
+  <section class="preference-popup" id="preferencePopup">
+    <div class="popup-overlay"></div>
+    <div class="popup-container">
+      <button class="popup-close" id="popupClose">&times;</button>
+
+      <div class="popup-header">
+        <h2>당신의 영화 취향을 알려주세요!</h2>
+        <p>몇 가지 질문으로 맞춤 영화를 추천해드립니다</p>
+      </div>
+
+      <div class="popup-content">
+        <!-- TODO: 취향 확인 질문 양식을 여기에 추가하세요 -->
+        <!-- 예시: 선호 장르, 좋아하는 분위기, 영화 시청 목적 등 -->
+
+      </div>
+
+      <div class="popup-footer">
+        <button class="btn-skip" id="btnSkip">건너뛰기</button>
+        <button class="btn-submit" id="btnSubmit">추천받기</button>
+      </div>
+    </div>
+  </section>
+  <!-- ==================== 취향 확인 팝업 섹션 끝 ==================== -->
+
   <!-- 헤더: 로고, 검색, 메뉴 -->
   <header class="header">
     <div class="logo">MovieFinder</div>
