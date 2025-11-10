@@ -156,3 +156,128 @@ async function fetchMovies() {
    - TMDB API에서 영화 데이터를 가져와 표시
    ============================================ */
 fetchMovies();
+
+/* ============================================
+   취향 확인 팝업 기능
+   - 5단계 질문과 결과 페이지
+   - localStorage로 재방문 여부 확인
+   ============================================ */
+const popup = document.getElementById('preferencePopup');
+const popupClose = document.getElementById('popupClose');
+const popupSteps = document.querySelectorAll('.popup-step');
+const popupResult = document.querySelector('.popup-result');
+const btnStart = document.getElementById('btnStart');
+
+let currentStep = 1;
+const totalSteps = 5;
+const userAnswers = {};
+
+// 단계 표시 함수
+function showStep(step) {
+  popupSteps.forEach(stepEl => {
+    stepEl.style.display = 'none';
+  });
+  popupResult.style.display = 'none';
+
+  const currentStepEl = document.querySelector(`.popup-step[data-step="${step}"]`);
+  if (currentStepEl) {
+    currentStepEl.style.display = 'block';
+  }
+}
+
+// 결과 페이지 표시
+function showResult() {
+  popupSteps.forEach(stepEl => {
+    stepEl.style.display = 'none';
+  });
+  popupResult.style.display = 'block';
+}
+
+// 페이지 로드 시 팝업 표시 여부 확인
+window.addEventListener('load', function() {
+  // 테스트를 위해 localStorage 초기화 (나중에 주석 해제)
+  localStorage.removeItem('hasVisited');
+
+  const hasVisited = localStorage.getItem('hasVisited');
+
+  if (!hasVisited) {
+    popup.classList.add('active');
+    showStep(1);
+  }
+});
+
+// 선택지 버튼 이벤트
+document.querySelectorAll('.option-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const step = this.closest('.popup-step').dataset.step;
+
+    // 같은 단계의 다른 버튼 선택 해제
+    this.closest('.popup-options').querySelectorAll('.option-btn').forEach(b => {
+      b.classList.remove('selected');
+    });
+
+    // 현재 버튼 선택
+    this.classList.add('selected');
+
+    // 답변 저장
+    userAnswers[`question${step}`] = this.dataset.value;
+  });
+});
+
+// 이전/다음 버튼 이벤트
+popupSteps.forEach(stepEl => {
+  const step = parseInt(stepEl.dataset.step);
+  const btnPrev = stepEl.querySelector('.btn-prev');
+  const btnNext = stepEl.querySelector('.btn-next');
+
+  // 이전 버튼
+  if (btnPrev) {
+    btnPrev.addEventListener('click', function() {
+      if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    });
+  }
+
+  // 다음 버튼
+  if (btnNext) {
+    btnNext.addEventListener('click', function() {
+      // 답변 선택 확인
+      if (!userAnswers[`question${currentStep}`]) {
+        alert('답변을 선택해주세요.');
+        return;
+      }
+
+      if (currentStep < totalSteps) {
+        currentStep++;
+        showStep(currentStep);
+      } else {
+        // 마지막 단계면 결과 페이지 표시
+        showResult();
+      }
+    });
+  }
+});
+
+// 팝업 닫기 함수
+function closePopup() {
+  popup.classList.remove('active');
+  localStorage.setItem('hasVisited', 'true');
+
+  // 초기화
+  currentStep = 1;
+  Object.keys(userAnswers).forEach(key => delete userAnswers[key]);
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.classList.remove('selected');
+  });
+}
+
+// X 버튼 클릭 시 팝업 닫기
+popupClose.addEventListener('click', closePopup);
+
+// 시작하기 버튼 클릭 시 팝업 닫기
+btnStart.addEventListener('click', closePopup);
+
+// 오버레이 클릭 시 팝업 닫기
+popup.querySelector('.popup-overlay').addEventListener('click', closePopup);

@@ -371,3 +371,263 @@ body {
   color: #9ca3af;
   font-size: 14px;
 }
+
+/* ============================================
+   취향 확인 팝업
+   ============================================ */
+.preference-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: none;
+}
+
+.preference-popup.active {
+  display: block;
+}
+
+.popup-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.popup-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #e8e8e8;
+  border-radius: 20px;
+  padding: 50px 40px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.popup-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #6b7280;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.popup-close:hover {
+  color: #2563eb;
+}
+
+/* 질문 단계 스타일 */
+.popup-step {
+  color: black;
+}
+
+.popup-question h2 {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: black;
+  line-height: 1.3;
+}
+
+.popup-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.option-btn {
+  background-color: #d1d1d1;
+  border: none;
+  padding: 18px 25px;
+  border-radius: 15px;
+  font-size: 18px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: black;
+}
+
+.option-btn.selected {
+  background-color: #1e3a5f;
+  color: white;
+}
+
+.option-btn:hover {
+  background-color: #c0c0c0;
+}
+
+.option-btn.selected:hover {
+  background-color: #2d4a6f;
+}
+
+/* 진행 바 */
+.popup-progress {
+  margin-bottom: 30px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #c0c0c0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #2563eb;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1e3a5f;
+}
+
+/* 네비게이션 버튼 */
+.popup-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.btn-prev, .btn-next {
+  flex: 1;
+  background-color: #1e3a5f;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-prev:disabled {
+  background-color: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-prev:hover:not(:disabled), .btn-next:hover {
+  background-color: #2d4a6f;
+}
+
+/* 결과 페이지 스타일 */
+.popup-result {
+  color: black;
+}
+
+.result-content {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 30px;
+  align-items: flex-start;
+}
+
+.result-movie {
+  flex-shrink: 0;
+}
+
+.result-poster {
+  width: 140px;
+  height: 200px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.result-movie h3 {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.result-text h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.result-text p {
+  font-size: 14px;
+  color: #4a4a4a;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.result-genres {
+  margin-bottom: 20px;
+}
+
+.genre-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.genre-label {
+  width: 60px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.genre-progress {
+  flex: 1;
+  height: 20px;
+  background-color: #c0c0c0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.genre-fill {
+  height: 100%;
+  background-color: #2563eb;
+  transition: width 0.5s;
+}
+
+.result-footer {
+  font-size: 14px;
+  color: #4a4a4a;
+  margin-top: 15px;
+}
+
+.result-button {
+  text-align: center;
+}
+
+.btn-start {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 15px 60px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-start:hover {
+  background-color: #1d4ed8;
+}
