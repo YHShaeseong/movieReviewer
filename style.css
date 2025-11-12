@@ -452,7 +452,7 @@ body {
 .footer-content > p {
   color: var(--text-secondary);
   margin-bottom: 30px;
-  max-width: 600px;
+  max-width: 1000px;
   line-height: 1.6;
 }
 
@@ -1391,4 +1391,3 @@ body {
 .carousel-dot:hover {
   background: rgba(255, 255, 255, 0.5);
 }
-
