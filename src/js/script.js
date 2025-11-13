@@ -218,10 +218,43 @@ async function loadHeroCarousel() {
       movies.map(async (movie) => {
         try {
           const videos = await tmdbApi.getMovieVideos(movie.id);
-          // YouTube 예고편 찾기
-          const trailer = videos.results.find(v =>
-            v.type === 'Trailer' && v.site === 'YouTube'
+
+          // 우선순위로 예고편 선택
+          // 1순위: 공식 한국어 예고편
+          let trailer = videos.results.find(v =>
+            v.type === 'Trailer' &&
+            v.site === 'YouTube' &&
+            v.official === true &&
+            v.iso_639_1 === 'ko'
           );
+
+          // 2순위: 공식 영어 예고편
+          if (!trailer) {
+            trailer = videos.results.find(v =>
+              v.type === 'Trailer' &&
+              v.site === 'YouTube' &&
+              v.official === true &&
+              v.iso_639_1 === 'en'
+            );
+          }
+
+          // 3순위: 공식 예고편 (언어 무관)
+          if (!trailer) {
+            trailer = videos.results.find(v =>
+              v.type === 'Trailer' &&
+              v.site === 'YouTube' &&
+              v.official === true
+            );
+          }
+
+          // 4순위: 아무 예고편
+          if (!trailer) {
+            trailer = videos.results.find(v =>
+              v.type === 'Trailer' &&
+              v.site === 'YouTube'
+            );
+          }
+
           return { ...movie, trailer };
         } catch (error) {
           console.error(`비디오 로드 실패 (영화 ID: ${movie.id}):`, error);
