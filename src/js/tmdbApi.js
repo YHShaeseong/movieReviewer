@@ -383,6 +383,420 @@ class TMDBApiService {
   }
 
   /* ============================================
+     스트리밍 정보 API (OTT 플랫폼)
+     ============================================ */
+
+  /**
+   * 영화 스트리밍 제공자 정보 가져오기 (Netflix, Disney+ 등)
+   * @param {number} movieId - 영화 ID
+   * @param {string} region - 지역 코드 (KR, US 등)
+   * @returns {Promise<Object>} 스트리밍 제공자 정보
+   */
+  async getWatchProviders(movieId, region = 'KR') {
+    return this._fetch(`/movie/${movieId}/watch/providers`);
+  }
+
+  /**
+   * 모든 스트리밍 제공자 목록
+   * @param {string} region - 지역 코드
+   * @returns {Promise<Object>} 제공자 목록
+   */
+  async getAvailableProviders(region = 'KR') {
+    return this._fetch('/watch/providers/movie', { watch_region: region });
+  }
+
+  /* ============================================
+     이미지 API
+     ============================================ */
+
+  /**
+   * 영화 이미지 가져오기 (포스터, 배경, 스틸컷)
+   * @param {number} movieId - 영화 ID
+   * @param {string} language - 언어 코드
+   * @returns {Promise<Object>} 이미지 목록
+   */
+  async getMovieImages(movieId, language = null) {
+    const params = language ? { language, include_image_language: `${language},null` } : {};
+    return this._fetch(`/movie/${movieId}/images`, params);
+  }
+
+  /**
+   * 인물 이미지 가져오기
+   * @param {number} personId - 인물 ID
+   * @returns {Promise<Object>} 프로필 이미지 목록
+   */
+  async getPersonImages(personId) {
+    return this._fetch(`/person/${personId}/images`);
+  }
+
+  /* ============================================
+     외부 ID API
+     ============================================ */
+
+  /**
+   * 영화 외부 ID 가져오기 (IMDb, Facebook, Instagram 등)
+   * @param {number} movieId - 영화 ID
+   * @returns {Promise<Object>} 외부 ID 정보
+   */
+  async getMovieExternalIds(movieId) {
+    return this._fetch(`/movie/${movieId}/external_ids`);
+  }
+
+  /**
+   * 인물 외부 ID 가져오기
+   * @param {number} personId - 인물 ID
+   * @returns {Promise<Object>} 외부 ID 정보
+   */
+  async getPersonExternalIds(personId) {
+    return this._fetch(`/person/${personId}/external_ids`);
+  }
+
+  /* ============================================
+     컬렉션 API (시리즈물)
+     ============================================ */
+
+  /**
+   * 영화 컬렉션 정보 가져오기 (마블, 해리포터 등)
+   * @param {number} collectionId - 컬렉션 ID
+   * @returns {Promise<Object>} 컬렉션 정보
+   */
+  async getCollection(collectionId) {
+    return this._fetch(`/collection/${collectionId}`);
+  }
+
+  /**
+   * 컬렉션 이미지 가져오기
+   * @param {number} collectionId - 컬렉션 ID
+   * @returns {Promise<Object>} 컬렉션 이미지
+   */
+  async getCollectionImages(collectionId) {
+    return this._fetch(`/collection/${collectionId}/images`);
+  }
+
+  /* ============================================
+     키워드 API
+     ============================================ */
+
+  /**
+   * 영화 키워드 가져오기
+   * @param {number} movieId - 영화 ID
+   * @returns {Promise<Object>} 키워드 목록
+   */
+  async getMovieKeywords(movieId) {
+    return this._fetch(`/movie/${movieId}/keywords`);
+  }
+
+  /**
+   * 키워드로 영화 검색
+   * @param {number} keywordId - 키워드 ID
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 영화 목록
+   */
+  async getMoviesByKeyword(keywordId, page = 1) {
+    return this.discoverMovies({
+      with_keywords: keywordId,
+      page
+    });
+  }
+
+  /**
+   * 키워드 검색
+   * @param {string} query - 검색어
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 키워드 목록
+   */
+  async searchKeywords(query, page = 1) {
+    return this._fetch('/search/keyword', { query, page }, false);
+  }
+
+  /* ============================================
+     인증 필요 API (계정 기능)
+     ============================================ */
+
+  /**
+   * 영화 평점 매기기
+   * @param {number} movieId - 영화 ID
+   * @param {number} rating - 평점 (0.5 ~ 10.0)
+   * @param {string} sessionId - 세션 ID
+   * @returns {Promise<Object>} 결과
+   */
+  async rateMovie(movieId, rating, sessionId) {
+    const url = `${this.config.BASE_URL}/movie/${movieId}/rating?api_key=${this.config.API_KEY}&session_id=${sessionId}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ value: rating })
+    });
+
+    return response.json();
+  }
+
+  /**
+   * 영화 평점 삭제
+   * @param {number} movieId - 영화 ID
+   * @param {string} sessionId - 세션 ID
+   * @returns {Promise<Object>} 결과
+   */
+  async deleteMovieRating(movieId, sessionId) {
+    const url = `${this.config.BASE_URL}/movie/${movieId}/rating?api_key=${this.config.API_KEY}&session_id=${sessionId}`;
+
+    const response = await fetch(url, {
+      method: 'DELETE'
+    });
+
+    return response.json();
+  }
+
+  /**
+   * Watchlist에 영화 추가/제거
+   * @param {number} accountId - 계정 ID
+   * @param {string} sessionId - 세션 ID
+   * @param {number} movieId - 영화 ID
+   * @param {boolean} addToWatchlist - true: 추가, false: 제거
+   * @returns {Promise<Object>} 결과
+   */
+  async updateWatchlist(accountId, sessionId, movieId, addToWatchlist = true) {
+    const url = `${this.config.BASE_URL}/account/${accountId}/watchlist?api_key=${this.config.API_KEY}&session_id=${sessionId}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        media_type: 'movie',
+        media_id: movieId,
+        watchlist: addToWatchlist
+      })
+    });
+
+    return response.json();
+  }
+
+  /**
+   * Favorite에 영화 추가/제거
+   * @param {number} accountId - 계정 ID
+   * @param {string} sessionId - 세션 ID
+   * @param {number} movieId - 영화 ID
+   * @param {boolean} favorite - true: 추가, false: 제거
+   * @returns {Promise<Object>} 결과
+   */
+  async updateFavorite(accountId, sessionId, movieId, favorite = true) {
+    const url = `${this.config.BASE_URL}/account/${accountId}/favorite?api_key=${this.config.API_KEY}&session_id=${sessionId}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        media_type: 'movie',
+        media_id: movieId,
+        favorite: favorite
+      })
+    });
+
+    return response.json();
+  }
+
+  /* ============================================
+     TV 시리즈 API
+     ============================================ */
+
+  /**
+   * TV 시리즈 상세 정보
+   * @param {number} tvId - TV 시리즈 ID
+   * @returns {Promise<Object>} TV 시리즈 정보
+   */
+  async getTVShowDetails(tvId) {
+    return this._fetch(`/tv/${tvId}`);
+  }
+
+  /**
+   * TV 시즌 정보
+   * @param {number} tvId - TV 시리즈 ID
+   * @param {number} seasonNumber - 시즌 번호
+   * @returns {Promise<Object>} 시즌 정보
+   */
+  async getSeasonDetails(tvId, seasonNumber) {
+    return this._fetch(`/tv/${tvId}/season/${seasonNumber}`);
+  }
+
+  /**
+   * TV 에피소드 정보
+   * @param {number} tvId - TV 시리즈 ID
+   * @param {number} seasonNumber - 시즌 번호
+   * @param {number} episodeNumber - 에피소드 번호
+   * @returns {Promise<Object>} 에피소드 정보
+   */
+  async getEpisodeDetails(tvId, seasonNumber, episodeNumber) {
+    return this._fetch(`/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`);
+  }
+
+  /**
+   * 인기 TV 시리즈
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} TV 시리즈 목록
+   */
+  async getPopularTVShows(page = 1) {
+    return this._fetch('/tv/popular', { page });
+  }
+
+  /**
+   * 최고 평점 TV 시리즈
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} TV 시리즈 목록
+   */
+  async getTopRatedTVShows(page = 1) {
+    return this._fetch('/tv/top_rated', { page });
+  }
+
+  /* ============================================
+     편의 기능 (프리셋)
+     ============================================ */
+
+  /**
+   * 한국 영화 가져오기
+   * @param {number} page - 페이지 번호
+   * @param {string} sortBy - 정렬 방식
+   * @returns {Promise<Object>} 한국 영화 목록
+   */
+  async getKoreanMovies(page = 1, sortBy = 'popularity.desc') {
+    return this.discoverMovies({
+      page,
+      sort_by: sortBy,
+      with_original_language: 'ko',
+      vote_count_gte: 100
+    });
+  }
+
+  /**
+   * 특정 연도 영화 가져오기
+   * @param {number} year - 연도
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 영화 목록
+   */
+  async getMoviesByYear(year, page = 1) {
+    return this.discoverMovies({
+      page,
+      primary_release_year: year,
+      sort_by: 'popularity.desc'
+    });
+  }
+
+  /**
+   * 특정 기간 영화 가져오기
+   * @param {number} yearFrom - 시작 연도
+   * @param {number} yearTo - 종료 연도
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 영화 목록
+   */
+  async getMoviesByYearRange(yearFrom, yearTo, page = 1) {
+    return this.discoverMovies({
+      page,
+      'primary_release_date.gte': `${yearFrom}-01-01`,
+      'primary_release_date.lte': `${yearTo}-12-31`,
+      sort_by: 'vote_average.desc',
+      vote_count_gte: 1000
+    });
+  }
+
+  /**
+   * 명작 영화 (평점 높은 영화)
+   * @param {number} minRating - 최소 평점
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 영화 목록
+   */
+  async getClassicMovies(minRating = 7.5, page = 1) {
+    return this.discoverMovies({
+      page,
+      sort_by: 'vote_average.desc',
+      vote_average_gte: minRating,
+      vote_count_gte: 2000
+    });
+  }
+
+  /**
+   * 최신 개봉작 (최근 3개월)
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 영화 목록
+   */
+  async getRecentReleases(page = 1) {
+    const today = new Date();
+    const threeMonthsAgo = new Date(today.setMonth(today.getMonth() - 3));
+    const dateFrom = threeMonthsAgo.toISOString().split('T')[0];
+    const dateTo = new Date().toISOString().split('T')[0];
+
+    return this.discoverMovies({
+      page,
+      'primary_release_date.gte': dateFrom,
+      'primary_release_date.lte': dateTo,
+      sort_by: 'popularity.desc'
+    });
+  }
+
+  /**
+   * 특정 배우 출연작
+   * @param {number} personId - 배우 ID
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 영화 목록
+   */
+  async getMoviesByActor(personId, page = 1) {
+    return this.discoverMovies({
+      page,
+      with_cast: personId,
+      sort_by: 'popularity.desc'
+    });
+  }
+
+  /**
+   * 특정 감독 작품
+   * @param {number} personId - 감독 ID
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 영화 목록
+   */
+  async getMoviesByDirector(personId, page = 1) {
+    return this.discoverMovies({
+      page,
+      with_crew: personId,
+      sort_by: 'popularity.desc'
+    });
+  }
+
+  /**
+   * 가족 영화 (전체 관람가)
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 영화 목록
+   */
+  async getFamilyMovies(page = 1) {
+    return this.discoverMovies({
+      page,
+      with_genres: '10751,16,12', // 가족, 애니메이션, 모험
+      certification_country: 'KR',
+      'certification.lte': 'ALL',
+      sort_by: 'popularity.desc'
+    });
+  }
+
+  /**
+   * 숨은 명작 (평점 높지만 덜 알려진)
+   * @param {number} page - 페이지 번호
+   * @returns {Promise<Object>} 영화 목록
+   */
+  async getHiddenGems(page = 1) {
+    return this.discoverMovies({
+      page,
+      sort_by: 'vote_average.desc',
+      vote_average_gte: 7.5,
+      'vote_count.gte': 100,
+      'vote_count.lte': 1000
+    });
+  }
+
+  /* ============================================
      유틸리티 메서드
      ============================================ */
 
