@@ -1,10 +1,7 @@
 /* ============================================
-   TMDB API 설정
+   TMDB API 모듈 사용
+   - tmdbApi.js에서 제공하는 API 서비스 사용
    ============================================ */
-const API_KEY = 'f325a6979b2e26db0c5ee2420d0f3138';
-const BASE_URL = 'https://api.themoviedb.org/3';
-const IMG_URL = 'https://image.tmdb.org/t/p/w500';
-const AUTH_TOKEN = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmMzI1YTY5NzliMmUyNmRiMGM1ZWUyNDIwZDBmMzEzOCIsIm5iZiI6MTc2MjE1NTY0MC4wMDcsInN1YiI6IjY5MDg1Yzc4NGQ0ZDdkYzlhYTU5ODg4ZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.tXYlaIIml1lr3ZoFa6CqWtKkXTgyWTVdSjAS6wjDv5I';
 
 /* ============================================
    무드 키워드 매핑 (Q3)
@@ -68,15 +65,20 @@ function renderMovies(movieList) {
   container.innerHTML = ''; // 기존 내용 초기화
 
   movieList.forEach((movie, index) => {
+    // 장르 이름 가져오기
+    const genreNames = movie.genre_ids
+      ? movie.genre_ids.map(id => GENRE_MAP[id] || '').filter(Boolean).join(', ')
+      : getGenreName(movie.genre);
+
     // 영화 카드 HTML 생성
     const movieCard = `
-      <div class="movie_item">
+      <div class="movie_item" data-movie-id="${movie.id}">
         <span class="rank-badge">#${index + 1}</span>
         <span class="rating-badge">★ ${movie.rating}</span>
         <img src="${movie.image}" alt="${movie.title}">
         <div class="movie-info">
           <div class="title">${movie.title}</div>
-          <div class="movie-meta">${movie.year} · ${getGenreName(movie.genre)}</div>
+          <div class="movie-meta">${movie.year} · ${genreNames}</div>
           <div class="movie-stats">
             <span class="likes">좋아요 ${movie.likes}</span>
             <span class="star-rating">★ ${movie.rating}</span>
@@ -148,22 +150,22 @@ function setupMainPageEvents() {
 }
 
 /* ============================================
-   TMDB API에서 영화 데이터 가져오기
+   TMDB API에서 영화 데이터 가져오기 (새로운 API 모듈 사용)
    ============================================ */
 async function fetchMovies() {
   try {
-    const response = await fetch(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}&language=ko-KR&page=1`);
-    const data = await response.json();
+    // tmdbApi 모듈의 getTopRatedMovies 메서드 사용
+    const data = await tmdbApi.getTopRatedMovies(1);
 
-    // TMDB 데이터를 기존 형식으로 변환
+    // TMDB 데이터를 화면 표시 형식으로 변환
     movies = data.results.map(movie => ({
       id: movie.id,
       title: movie.title,
       year: movie.release_date ? movie.release_date.split('-')[0] : 'N/A',
-      genre: 'drama', // 기본값 (장르 ID 매핑 필요 시 추가 가능)
+      genre_ids: movie.genre_ids,
       rating: movie.vote_average.toFixed(1),
       likes: `${(movie.vote_count / 1000).toFixed(1)}K`,
-      image: movie.poster_path ? `${IMG_URL}${movie.poster_path}` : 'https://via.placeholder.com/300x450'
+      image: tmdbApi.getImageUrl(movie.poster_path, 'w500')
     }));
 
     renderMovies(movies);
@@ -185,9 +187,10 @@ async function loadHeroCarousel() {
     let movies = [];
 
     if (savedProfile) {
-      // 프로필이 있으면 추천 영화 가져오기
+      // 프로필이 있으면 개인화된 추천 영화 가져오기 (새 API 모듈 사용)
       const profile = JSON.parse(savedProfile);
 
+      // 불호 장르 계산
       const withoutGenres = [];
       if (profile.dislikes) {
         profile.dislikes.forEach(dislike => {
@@ -198,28 +201,15 @@ async function loadHeroCarousel() {
         });
       }
 
-      const params = new URLSearchParams({
-        api_key: API_KEY,
-        language: 'ko-KR',
-        sort_by: profile.sortBy || 'popularity.desc',
-        with_genres: profile.genres.join(','),
-        page: 1,
-        vote_count_gte: 500
-      });
+      // dislikedGenres에 추가
+      profile.dislikedGenres = withoutGenres;
 
-      if (withoutGenres.length > 0) {
-        params.append('without_genres', withoutGenres.join(','));
-      }
-
-      const response = await fetch(`${BASE_URL}/discover/movie?${params}`);
-      const data = await response.json();
+      // tmdbApi의 getPersonalizedRecommendations 사용
+      const data = await tmdbApi.getPersonalizedRecommendations(profile);
       movies = data.results.slice(0, 5);
     } else {
       // 프로필이 없으면 인기 영화 가져오기
-      const response = await fetch(
-        `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=ko-KR&page=1`
-      );
-      const data = await response.json();
+      const data = await tmdbApi.getPopularMovies(1);
       movies = data.results.slice(0, 5);
     }
 
@@ -245,7 +235,8 @@ function renderHeroCarousel() {
 
   heroMovies.forEach((movie, index) => {
     const genreNames = movie.genre_ids.map(id => GENRE_MAP[id] || '').filter(Boolean).join(', ');
-    const backdropUrl = movie.backdrop_path ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` : '';
+    // tmdbApi 모듈의 getImageUrl 사용
+    const backdropUrl = movie.backdrop_path ? tmdbApi.getImageUrl(movie.backdrop_path, 'original') : '';
 
     const slide = document.createElement('div');
     slide.className = 'hero-slide';
