@@ -213,7 +213,24 @@ async function loadHeroCarousel() {
       movies = data.results.slice(0, 5);
     }
 
-    heroMovies = movies;
+    // 각 영화의 비디오 정보 가져오기 (예고편 확인)
+    const moviesWithVideos = await Promise.all(
+      movies.map(async (movie) => {
+        try {
+          const videos = await tmdbApi.getMovieVideos(movie.id);
+          // YouTube 예고편 찾기
+          const trailer = videos.results.find(v =>
+            v.type === 'Trailer' && v.site === 'YouTube'
+          );
+          return { ...movie, trailer };
+        } catch (error) {
+          console.error(`비디오 로드 실패 (영화 ID: ${movie.id}):`, error);
+          return { ...movie, trailer: null };
+        }
+      })
+    );
+
+    heroMovies = moviesWithVideos;
     renderHeroCarousel();
     setupHeroCarouselEvents();
   } catch (error) {
@@ -238,6 +255,9 @@ function renderHeroCarousel() {
     // tmdbApi 모듈의 getImageUrl 사용
     const backdropUrl = movie.backdrop_path ? tmdbApi.getImageUrl(movie.backdrop_path, 'original') : '';
 
+    // 예고편 있는지 확인
+    const hasTrailer = movie.trailer && movie.trailer.key;
+
     const slide = document.createElement('div');
     slide.className = 'hero-slide';
     slide.style.backgroundImage = backdropUrl ?
@@ -251,8 +271,9 @@ function renderHeroCarousel() {
         <p class="hero-info">평점 ${movie.vote_average.toFixed(1)} | ${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'} | ${genreNames}</p>
         <p class="hero-desc">${movie.overview || '영화 설명이 없습니다.'}</p>
         <div class="hero-buttons">
-          <button class="btn-play">예고편 보기</button>
-          <button class="btn-info">상세 정보</button>
+          <button class="btn-play ${!hasTrailer ? 'disabled' : ''}" data-movie-id="${movie.id}" data-trailer-key="${hasTrailer ? movie.trailer.key : ''}">
+            ▶ 예고편 보기
+          </button>
         </div>
       </div>
       <div class="hero-rating">평점 ${movie.vote_average.toFixed(1)}</div>
@@ -273,18 +294,72 @@ function renderHeroCarousel() {
 }
 
 function setupHeroButtonEvents() {
-  // 동적으로 생성된 히어로 버튼에 이벤트 추가
+  // 플레이 버튼 이벤트 추가
   document.querySelectorAll('.btn-play').forEach(btn => {
     btn.addEventListener('click', function() {
-      alert('예고편 재생 기능은 준비 중입니다.');
-    });
-  });
+      // disabled 버튼은 클릭 무시
+      if (this.classList.contains('disabled')) {
+        alert('이 영화의 예고편이 없습니다.');
+        return;
+      }
 
-  document.querySelectorAll('.btn-info').forEach(btn => {
-    btn.addEventListener('click', function() {
-      alert('상세 정보 페이지로 이동합니다.');
+      const trailerKey = this.dataset.trailerKey;
+      if (trailerKey) {
+        openTrailerModal(trailerKey);
+      }
     });
   });
+}
+
+/* ============================================
+   예고편 모달 열기/닫기
+   ============================================ */
+function openTrailerModal(trailerKey) {
+  // 모달이 없으면 생성
+  let modal = document.getElementById('trailerModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'trailerModal';
+    modal.className = 'trailer-modal';
+    modal.innerHTML = `
+      <div class="trailer-modal-content">
+        <span class="trailer-modal-close">&times;</span>
+        <div class="trailer-container">
+          <iframe id="trailerIframe" src="" frameborder="0" allowfullscreen></iframe>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // 닫기 버튼 이벤트
+    const closeBtn = modal.querySelector('.trailer-modal-close');
+    closeBtn.addEventListener('click', closeTrailerModal);
+
+    // 모달 배경 클릭 시 닫기
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeTrailerModal();
+      }
+    });
+  }
+
+  // YouTube 임베드 URL 설정
+  const iframe = document.getElementById('trailerIframe');
+  iframe.src = `https://www.youtube.com/embed/${trailerKey}?autoplay=1`;
+
+  // 모달 표시
+  modal.style.display = 'flex';
+}
+
+function closeTrailerModal() {
+  const modal = document.getElementById('trailerModal');
+  const iframe = document.getElementById('trailerIframe');
+
+  // 비디오 중지 (iframe src 초기화)
+  iframe.src = '';
+
+  // 모달 숨김
+  modal.style.display = 'none';
 }
 
 function updateHeroCarousel() {
