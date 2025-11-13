@@ -353,15 +353,32 @@ fetchMovies();
 setupMainPageEvents();
 
 /* ============================================
+   인증 (로그인/회원가입) 관련 변수 및 상태
+   ============================================ */
+// 간단한 사용자 데이터베이스 (실제로는 서버 DB 사용)
+// 구조: [{ username: '아이디', password: '비밀번호' }]
+let usersDB = JSON.parse(localStorage.getItem('usersDB')) || [];
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+let isLoginMode = true;
+
+/* ============================================
    팝업 iframe 제어
    ============================================ */
 
-// 페이지 로드 시 팝업 표시
+// 페이지 로드 시 팝업 표시 및 인증 상태 확인
 window.addEventListener('DOMContentLoaded', () => {
   const popupFrame = document.getElementById('popupFrame');
   if (popupFrame) {
     // 항상 팝업을 표시
     popupFrame.style.display = 'block';
+  }
+
+  // 로그인 상태 확인 및 UI 업데이트
+  updateAuthUI();
+
+  // 로그인 상태일 경우 서버에서 데이터 로드 (시뮬레이션)
+  if (currentUser) {
+    loadUserDataFromServer();
   }
 });
 
@@ -374,5 +391,285 @@ window.addEventListener('message', (event) => {
     }
     // 히어로 캐러셀 새로고침
     loadHeroCarousel();
+  }
+});
+
+/* ============================================
+   인증 UI 업데이트
+   - 로그인 상태에 따라 버튼 표시/숨김
+   ============================================ */
+function updateAuthUI() {
+  const loginBtn = document.querySelector('.login-btn');
+  const userInfo = document.getElementById('userInfo');
+  const userName = document.getElementById('userName');
+
+  if (currentUser) {
+    // 로그인 상태: 사용자 정보 표시
+    loginBtn.style.display = 'none';
+    userInfo.style.display = 'flex';
+    userName.textContent = currentUser.username;
+  } else {
+    // 비로그인 상태: 로그인 버튼 표시
+    loginBtn.style.display = 'block';
+    userInfo.style.display = 'none';
+  }
+}
+
+/* ============================================
+   인증 모달 이벤트 핸들러
+   ============================================ */
+// 로그인 버튼 클릭
+const loginBtn = document.querySelector('.login-btn');
+if (loginBtn) {
+  loginBtn.addEventListener('click', () => {
+    openAuthModal('login');
+  });
+}
+
+// 로그아웃 버튼 클릭
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    if (confirm('로그아웃 하시겠습니까?')) {
+      logout();
+    }
+  });
+}
+
+/* ============================================
+   인증 모달 열기/닫기
+   - mode: 'login' 또는 'signup'
+   ============================================ */
+function openAuthModal(mode) {
+  const modal = document.getElementById('authModal');
+  const authTitle = document.getElementById('authTitle');
+  const authSubmitBtn = document.getElementById('authSubmitBtn');
+  const authSwitchText = document.getElementById('authSwitchText');
+  const authSwitchLink = document.getElementById('authSwitchLink');
+
+  isLoginMode = mode === 'login';
+
+  if (isLoginMode) {
+    authTitle.textContent = '로그인';
+    authSubmitBtn.textContent = '로그인';
+    authSwitchText.textContent = '계정이 없으신가요?';
+    authSwitchLink.textContent = '회원가입';
+  } else {
+    authTitle.textContent = '회원가입';
+    authSubmitBtn.textContent = '회원가입';
+    authSwitchText.textContent = '이미 계정이 있으신가요?';
+    authSwitchLink.textContent = '로그인';
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('authModal');
+  modal.style.display = 'none';
+  document.getElementById('authForm').reset();
+}
+
+// 모달 닫기 버튼 이벤트
+const authModalClose = document.querySelector('#authModal .modal-close');
+if (authModalClose) {
+  authModalClose.addEventListener('click', closeAuthModal);
+}
+
+// 로그인/회원가입 전환 링크
+const authSwitchLink = document.getElementById('authSwitchLink');
+if (authSwitchLink) {
+  authSwitchLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    openAuthModal(isLoginMode ? 'signup' : 'login');
+  });
+}
+
+// 인증 폼 제출
+const authForm = document.getElementById('authForm');
+if (authForm) {
+  authForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById('authUsername').value;
+    const password = document.getElementById('authPassword').value;
+
+    if (isLoginMode) {
+      // 로그인 처리
+      login(username, password);
+    } else {
+      // 회원가입 처리
+      signup(username, password);
+    }
+  });
+}
+
+/* ============================================
+   로그인 처리
+   - localStorage의 사용자 데이터 확인
+   - 성공 시 LocalStorage 데이터를 서버로 업로드 (시뮬레이션)
+   ============================================ */
+function login(username, password) {
+  // 아이디와 비밀번호로 사용자 찾기
+  const user = usersDB.find(u => u.username === username && u.password === password);
+
+  if (user) {
+    // 로그인 성공: 현재 사용자 정보 저장
+    currentUser = { username: user.username };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+    alert('로그인 성공!');
+    closeAuthModal();
+    updateAuthUI();
+
+    // LocalStorage 데이터를 서버로 업로드
+    uploadLocalDataToServer();
+
+    // 히어로 캐러셀 새로고침
+    loadHeroCarousel();
+  } else {
+    alert('아이디 또는 비밀번호가 일치하지 않습니다.');
+  }
+}
+
+/* ============================================
+   회원가입 처리
+   - 새 사용자를 usersDB에 추가
+   ============================================ */
+function signup(username, password) {
+  // 아이디 중복 확인
+  const existingUser = usersDB.find(u => u.username === username);
+
+  if (existingUser) {
+    alert('이미 사용 중인 아이디입니다.');
+    return;
+  }
+
+  // 아이디 유효성 검사
+  if (username.length < 4) {
+    alert('아이디는 4자 이상이어야 합니다.');
+    return;
+  }
+
+  // 비밀번호 유효성 검사
+  if (password.length < 6) {
+    alert('비밀번호는 6자 이상이어야 합니다.');
+    return;
+  }
+
+  // 새 사용자 추가
+  usersDB.push({ username, password });
+  localStorage.setItem('usersDB', JSON.stringify(usersDB));
+
+  alert('회원가입 성공! 로그인해주세요.');
+  openAuthModal('login');
+}
+
+/* ============================================
+   로그아웃 처리
+   ============================================ */
+function logout() {
+  currentUser = null;
+  localStorage.removeItem('currentUser');
+
+  alert('로그아웃되었습니다.');
+  updateAuthUI();
+
+  // 히어로 캐러셀 새로고침
+  loadHeroCarousel();
+}
+
+/* ============================================
+   LocalStorage 데이터를 서버로 업로드 (시뮬레이션)
+   - 실제로는 fetch로 서버 API 호출
+   - 여기서는 localStorage의 userProfile을 서버 데이터로 복사
+   ============================================ */
+function uploadLocalDataToServer() {
+  const userProfile = localStorage.getItem('userProfile');
+
+  if (userProfile && currentUser) {
+    // 서버에 저장 시뮬레이션 (실제로는 fetch 사용)
+    const serverKey = `server_${currentUser.username}_profile`;
+    localStorage.setItem(serverKey, userProfile);
+
+    console.log('LocalStorage 데이터를 서버로 업로드했습니다.');
+  }
+}
+
+/* ============================================
+   서버에서 사용자 데이터 로드 (시뮬레이션)
+   - 로그인 상태일 때 호출
+   - 서버 데이터가 있으면 LocalStorage에 덮어쓰기
+   ============================================ */
+function loadUserDataFromServer() {
+  if (!currentUser) return;
+
+  // 서버에서 데이터 로드 시뮬레이션
+  const serverKey = `server_${currentUser.username}_profile`;
+  const serverData = localStorage.getItem(serverKey);
+
+  if (serverData) {
+    // 서버 데이터를 LocalStorage에 복사
+    localStorage.setItem('userProfile', serverData);
+    console.log('서버에서 사용자 데이터를 로드했습니다.');
+  }
+}
+
+/* ============================================
+   Watchlist 버튼 클릭
+   - 로그인 상태 확인
+   - 비로그인 시 로그인 필요 모달 표시
+   ============================================ */
+const watchlistBtn = document.getElementById('watchlistBtn');
+if (watchlistBtn) {
+  watchlistBtn.addEventListener('click', () => {
+    if (!currentUser) {
+      // 비로그인 상태: 로그인 필요 모달 표시
+      openWatchlistLoginModal();
+    } else {
+      // 로그인 상태: Watchlist 페이지로 이동 (현재는 알림)
+      alert('Watchlist 페이지 기능은 준비 중입니다.');
+    }
+  });
+}
+
+/* ============================================
+   Watchlist 로그인 필요 모달 열기/닫기
+   ============================================ */
+function openWatchlistLoginModal() {
+  const modal = document.getElementById('watchlistLoginModal');
+  modal.style.display = 'flex';
+}
+
+function closeWatchlistLoginModal() {
+  const modal = document.getElementById('watchlistLoginModal');
+  modal.style.display = 'none';
+}
+
+// Watchlist 모달 닫기 버튼
+const watchlistModalClose = document.querySelector('#watchlistLoginModal .modal-close');
+if (watchlistModalClose) {
+  watchlistModalClose.addEventListener('click', closeWatchlistLoginModal);
+}
+
+// 로그인하러 가기 버튼
+const goToLoginBtn = document.getElementById('goToLoginBtn');
+if (goToLoginBtn) {
+  goToLoginBtn.addEventListener('click', () => {
+    closeWatchlistLoginModal();
+    openAuthModal('login');
+  });
+}
+
+// 모달 외부 클릭 시 닫기
+window.addEventListener('click', (e) => {
+  const authModal = document.getElementById('authModal');
+  const watchlistModal = document.getElementById('watchlistLoginModal');
+
+  if (e.target === authModal) {
+    closeAuthModal();
+  }
+  if (e.target === watchlistModal) {
+    closeWatchlistLoginModal();
   }
 });
