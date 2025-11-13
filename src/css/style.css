@@ -232,60 +232,127 @@ body {
 }
 
 /* ============================================
-   추천 섹션 - 장르 선택
+   오늘 이건 어떤데? 섹션 - 가로 스크롤
    ============================================ */
-.recommendation {
-  text-align: center;
+.daily-recommendation {
   padding: 80px 40px;
   background: linear-gradient(180deg, var(--bg-dark) 0%, #1a2332 100%);
 }
 
-.recommendation h2 {
-  font-size: 36px;
-  margin-bottom: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
+.daily-recommendation .section-header {
+  margin-bottom: 40px;
 }
 
-.recommendation p {
+.daily-recommendation h2 {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.daily-recommendation p {
   color: var(--text-secondary);
-  margin-bottom: 40px;
   font-size: 18px;
 }
 
-.genre-filter {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  flex-wrap: wrap;
-  max-width: 1000px;
-  margin: 0 auto;
+.horizontal-scroll-container {
+  position: relative;
+  width: 100%;
 }
 
-.genre-btn {
-  background: var(--bg-card);
-  border: 2px solid var(--border-color);
-  padding: 15px 30px;
-  border-radius: 12px;
+.horizontal-scroll {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding: 20px 0;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 32px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-secondary);
+  z-index: 10;
   transition: all 0.3s ease;
 }
 
-.genre-btn:hover {
-  background: rgba(59, 130, 246, 0.1);
+.scroll-btn:hover {
+  background: var(--primary-blue);
   border-color: var(--primary-blue);
-  color: var(--primary-light);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-50%) scale(1.1);
 }
 
-.genre-btn.active {
-  background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
-  border-color: var(--primary-blue);
-  color: white;
+.scroll-btn.prev {
+  left: -25px;
+}
+
+.scroll-btn.next {
+  right: -25px;
+}
+
+.daily-movie-card {
+  min-width: 200px;
+  max-width: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg-card);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.daily-movie-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.daily-movie-card img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.daily-movie-card:hover img {
+  transform: scale(1.1);
+}
+
+.daily-movie-info {
+  padding: 12px;
+}
+
+.daily-movie-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3;
+}
+
+.daily-movie-rating {
+  font-size: 14px;
+  color: var(--accent-cyan);
+  font-weight: 700;
 }
 
 /* ============================================

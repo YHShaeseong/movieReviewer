@@ -443,11 +443,103 @@ function setupHeroCarouselEvents() {
 }
 
 /* ============================================
+   오늘 이건 어떤데? 섹션 로드
+   ============================================ */
+async function loadDailyRecommendations() {
+  try {
+    const savedProfile = localStorage.getItem('userProfile');
+    const container = document.getElementById('dailyMovieScroll');
+
+    if (!container) return;
+
+    let movies = [];
+
+    if (savedProfile) {
+      // 사용자 취향 기반 추천
+      const profile = JSON.parse(savedProfile);
+
+      // 불호 장르 계산
+      const withoutGenres = [];
+      if (profile.dislikes) {
+        profile.dislikes.forEach(dislike => {
+          const mapping = DISLIKE_MAPPING[dislike];
+          if (mapping && mapping.genres) {
+            withoutGenres.push(...mapping.genres);
+          }
+        });
+      }
+
+      profile.dislikedGenres = withoutGenres;
+
+      // 개인화 추천 (페이지 2-3 랜덤)
+      const randomPage = Math.floor(Math.random() * 2) + 2; // 2 or 3
+      const data = await tmdbApi.getPersonalizedRecommendations({
+        ...profile,
+        page: randomPage
+      });
+      movies = data.results.slice(0, 20); // 20개 영화
+    } else {
+      // 프로필 없으면 트렌딩 영화
+      const data = await tmdbApi.getTrending('movie', 'week');
+      movies = data.results.slice(0, 20);
+    }
+
+    // 영화 카드 렌더링
+    container.innerHTML = '';
+    movies.forEach(movie => {
+      const card = document.createElement('div');
+      card.className = 'daily-movie-card';
+      card.innerHTML = `
+        <img src="${tmdbApi.getImageUrl(movie.poster_path, 'w342')}" alt="${movie.title}">
+        <div class="daily-movie-info">
+          <div class="daily-movie-title">${movie.title}</div>
+          <div class="daily-movie-rating">★ ${movie.vote_average.toFixed(1)}</div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    // 스크롤 버튼 이벤트 설정
+    setupDailyScrollButtons();
+  } catch (error) {
+    console.error('일일 추천 로딩 실패:', error);
+  }
+}
+
+/* ============================================
+   가로 스크롤 버튼 이벤트
+   ============================================ */
+function setupDailyScrollButtons() {
+  const container = document.getElementById('dailyMovieScroll');
+  const prevBtn = document.getElementById('dailyPrev');
+  const nextBtn = document.getElementById('dailyNext');
+
+  if (!container || !prevBtn || !nextBtn) return;
+
+  // 이전 버튼
+  prevBtn.addEventListener('click', () => {
+    container.scrollBy({
+      left: -440, // 카드 2개 너비 (200px * 2 + gap)
+      behavior: 'smooth'
+    });
+  });
+
+  // 다음 버튼
+  nextBtn.addEventListener('click', () => {
+    container.scrollBy({
+      left: 440,
+      behavior: 'smooth'
+    });
+  });
+}
+
+/* ============================================
    페이지 로드 시 초기 렌더링
    - TMDB API에서 영화 데이터를 가져와 표시
    ============================================ */
 // 즉시 실행 (script 태그가 body 끝에 있으므로)
 loadHeroCarousel();
+loadDailyRecommendations();
 fetchMovies();
 setupMainPageEvents();
 
