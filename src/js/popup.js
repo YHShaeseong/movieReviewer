@@ -224,14 +224,14 @@ async function loadSecondPopupMovies() {
       });
     }
 
-    // API 파라미터 구성 - 조건 완화
+    // API 파라미터 구성 - 인기 있고 유명한 영화 우선
     const params = new URLSearchParams({
       api_key: API_KEY,
       language: 'ko-KR',
-      sort_by: userProfile.sortBy || 'popularity.desc',
+      sort_by: 'popularity.desc',  // 인기순으로 정렬
       with_genres: genreIds,
-      vote_count_gte: 300,  // 1000 → 300으로 완화
-      vote_average_gte: 6.0, // 7.0 → 6.0으로 완화
+      vote_count_gte: 2000,  // 많은 평가를 받은 유명한 영화
+      vote_average_gte: 7.0, // 평점 7.0 이상
       page: 1
     });
 
@@ -245,14 +245,15 @@ async function loadSecondPopupMovies() {
 
     let movies = data.results;
 
-    // 결과가 부족하면 조건 더 완화
-    if (movies.length < 10) {
+    // 결과가 부족하면 조건 완화하되 여전히 인기 영화만
+    if (movies.length < 5) {
       const fallbackParams = new URLSearchParams({
         api_key: API_KEY,
         language: 'ko-KR',
         sort_by: 'popularity.desc',
         with_genres: genreIds,
-        vote_count_gte: 100,  // 더 완화
+        vote_count_gte: 1000,  // 평가 수 기준 낮춤
+        vote_average_gte: 6.5, // 평점 기준 약간 낮춤
         page: 1
       });
 
@@ -268,8 +269,8 @@ async function loadSecondPopupMovies() {
     const ratingGrid = document.getElementById('movieRatingGrid');
     ratingGrid.innerHTML = '';
 
-    // 상위 10개 영화 표시
-    movies.slice(0, 10).forEach((movie, index) => {
+    // 상위 5개 영화만 표시
+    movies.slice(0, 5).forEach((movie, index) => {
       const ratingCard = document.createElement('div');
       ratingCard.className = 'rating-card';
       ratingCard.dataset.movieId = movie.id;
@@ -370,8 +371,8 @@ async function loadSecondPopupMovies() {
       // Pass하지 않은 평가만 카운트
       const validRatings = userProfile.ratings.filter(r => !r.passed);
 
-      if (validRatings.length < 5) {
-        alert('최소 5개 이상의 영화에 별점을 매겨주세요. (Pass는 제외)');
+      if (validRatings.length < 3) {
+        alert('최소 3개 이상의 영화에 별점을 매겨주세요. (Pass는 제외)');
         return;
       }
 

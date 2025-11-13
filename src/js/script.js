@@ -534,14 +534,15 @@ function setupDailyScrollButtons() {
 }
 
 /* ============================================
-   페이지 로드 시 초기 렌더링
-   - TMDB API에서 영화 데이터를 가져와 표시
+   메인 콘텐츠 초기화 함수
+   - 히어로 캐러셀, 일일 추천, TOP100 영화 로드
    ============================================ */
-// 즉시 실행 (script 태그가 body 끝에 있으므로)
-loadHeroCarousel();
-loadDailyRecommendations();
-fetchMovies();
-setupMainPageEvents();
+function initializeMainContent() {
+  loadHeroCarousel();
+  loadDailyRecommendations();
+  fetchMovies();
+  setupMainPageEvents();
+}
 
 /* ============================================
    인증 (로그인/회원가입) 관련 변수 및 상태
@@ -559,9 +560,16 @@ let isLoginMode = true;
 // 페이지 로드 시 팝업 표시 및 인증 상태 확인
 window.addEventListener('DOMContentLoaded', () => {
   const popupFrame = document.getElementById('popupFrame');
+  const surveyCompleted = localStorage.getItem('survey_completed');
+
   if (popupFrame) {
-    // 항상 팝업을 표시
-    popupFrame.style.display = 'block';
+    if (!surveyCompleted) {
+      // 설문 완료하지 않았으면 팝업 표시
+      popupFrame.style.display = 'block';
+    } else {
+      // 설문 완료했으면 메인 콘텐츠 로드
+      initializeMainContent();
+    }
   }
 
   // 로그인 상태 확인 및 UI 업데이트
@@ -580,8 +588,8 @@ window.addEventListener('message', (event) => {
     if (popupFrame) {
       popupFrame.style.display = 'none';
     }
-    // 히어로 캐러셀 새로고침
-    loadHeroCarousel();
+    // 메인 콘텐츠 초기화 (히어로 캐러셀, 일일 추천, TOP100)
+    initializeMainContent();
   }
 });
 
