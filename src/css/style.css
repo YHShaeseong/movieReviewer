@@ -393,13 +393,60 @@ body {
   font-size: 18px;
 }
 
+/* 더보기 버튼 */
+.view-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+.view-more-btn {
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
+  color: white;
+  border: none;
+  padding: 16px 48px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.view-more-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5);
+}
+
+.view-more-btn:active {
+  transform: translateY(-1px);
+}
+
 /* ============================================
-   영화 그리드 - 영화 카드 레이아웃
+   영화 그리드 - 영화 카드 레이아웃 (5개씩)
    ============================================ */
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 24px;
+}
+
+@media (max-width: 1400px) {
+  .movie-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .movie-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .movie-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .movie_item {

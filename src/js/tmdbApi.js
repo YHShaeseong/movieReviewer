@@ -306,9 +306,9 @@ class TMDBApiService {
    */
   async getPersonalizedRecommendations(userProfile) {
     const filters = {
-      page: 1,
+      page: userProfile.page || 1,
       sort_by: userProfile.sortBy || 'popularity.desc',
-      vote_count_gte: 500
+      'vote_count.gte': 100  // 평점 수 100개 이상만 추천
     };
 
     // 선호 장르
@@ -323,15 +323,15 @@ class TMDBApiService {
 
     // 평점 필터
     if (userProfile.minRating) {
-      filters.vote_average_gte = userProfile.minRating;
+      filters['vote_average.gte'] = userProfile.minRating;
     }
 
     // 개봉 연도 필터
     if (userProfile.yearFrom) {
-      filters.primary_release_date_gte = `${userProfile.yearFrom}-01-01`;
+      filters['primary_release_date.gte'] = `${userProfile.yearFrom}-01-01`;
     }
     if (userProfile.yearTo) {
-      filters.primary_release_date_lte = `${userProfile.yearTo}-12-31`;
+      filters['primary_release_date.lte'] = `${userProfile.yearTo}-12-31`;
     }
 
     return this.discoverMovies(filters);
