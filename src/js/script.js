@@ -559,34 +559,92 @@ let isLoginMode = true;
 
 // 페이지 로드 시 팝업 표시 및 인증 상태 확인
 window.addEventListener('DOMContentLoaded', () => {
-  const popupFrame = document.getElementById('popupFrame');
-  const surveyCompleted = localStorage.getItem('survey_completed');
+  console.log('🔥 DOMContentLoaded 이벤트 실행됨');
 
-  if (popupFrame) {
-    if (!surveyCompleted) {
-      // 설문 완료하지 않았으면 팝업 표시
-      popupFrame.style.display = 'block';
-    } else {
-      // 설문 완료했으면 메인 콘텐츠 로드
-      initializeMainContent();
+  // URL 파라미터로 초기화 기능 추가 (개발자 모드)
+  // 사용법: index.html?reset=true
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('reset') === 'true') {
+    console.log('🔄 개발자 모드: localStorage 및 sessionStorage 초기화');
+    localStorage.removeItem('survey_completed');
+    localStorage.removeItem('userProfile');
+    sessionStorage.removeItem('popup_shown');
+    // 서버 데이터도 초기화 (개발 모드)
+    if (currentUser) {
+      const serverKey = `server_${currentUser.username}_profile`;
+      localStorage.removeItem(serverKey);
     }
+    // URL에서 reset 파라미터 제거하고 리로드
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
+
+  const popupFrame = document.getElementById('popupFrame');
+
+  console.log('📌 popupFrame:', popupFrame);
+  console.log('📌 currentUser:', currentUser);
 
   // 로그인 상태 확인 및 UI 업데이트
   updateAuthUI();
 
-  // 로그인 상태일 경우 서버에서 데이터 로드 (시뮬레이션)
-  if (currentUser) {
-    loadUserDataFromServer();
+  if (popupFrame) {
+    let shouldShowPopup = false;
+
+    if (currentUser) {
+      // 로그인한 사용자: 서버에 저장된 프로필 확인
+      console.log('✅ 로그인 사용자: 서버 데이터 확인');
+      const serverKey = `server_${currentUser.username}_profile`;
+      const serverData = localStorage.getItem(serverKey);
+
+      console.log('📌 서버 프로필 데이터:', serverData);
+
+      if (!serverData) {
+        // 서버에 프로필이 없으면 팝업 표시
+        shouldShowPopup = true;
+        console.log('✅ 팝업 표시: 서버에 프로필 없음');
+      } else {
+        // 서버에 프로필이 있으면 로드하고 메인 콘텐츠 표시
+        localStorage.setItem('userProfile', serverData);
+        console.log('✅ 메인 콘텐츠 로드: 서버 프로필 있음');
+      }
+    } else {
+      // 비로그인 사용자: 세션당 한 번씩 무조건 팝업 표시
+      console.log('✅ 비로그인 사용자: 세션 기반 팝업 확인');
+      const sessionPopupShown = sessionStorage.getItem('popup_shown');
+
+      console.log('📌 sessionStorage popup_shown:', sessionPopupShown);
+
+      if (!sessionPopupShown) {
+        // 이번 세션에 팝업을 표시하지 않았으면 무조건 표시
+        shouldShowPopup = true;
+        sessionStorage.setItem('popup_shown', 'true');
+        console.log('✅ 팝업 표시: 세션 첫 방문');
+      } else {
+        // 이미 이번 세션에 팝업을 표시했으면 메인 콘텐츠 로드
+        console.log('✅ 메인 콘텐츠 로드: 세션 내 재방문');
+      }
+    }
+
+    // 팝업 표시 여부 결정
+    if (shouldShowPopup) {
+      popupFrame.style.display = 'block';
+    } else {
+      initializeMainContent();
+    }
+  } else {
+    console.error('❌ popupFrame 요소를 찾을 수 없음!');
   }
 });
 
 // 팝업에서 메시지 받기 (닫기 이벤트)
 window.addEventListener('message', (event) => {
+  console.log('📨 메시지 수신:', event.data);
+
   if (event.data.action === 'closePopup') {
+    console.log('✅ closePopup 액션 수신됨');
     const popupFrame = document.getElementById('popupFrame');
     if (popupFrame) {
       popupFrame.style.display = 'none';
+      console.log('✅ 팝업 숨김 처리 완료');
     }
     // 메인 콘텐츠 초기화 (히어로 캐러셀, 일일 추천, TOP100)
     initializeMainContent();
@@ -706,7 +764,7 @@ if (authForm) {
 /* ============================================
    로그인 처리
    - localStorage의 사용자 데이터 확인
-   - 성공 시 LocalStorage 데이터를 서버로 업로드 (시뮬레이션)
+   - 성공 시 서버 데이터 확인 후 프로필 로드 또는 팝업 표시
    ============================================ */
 function login(username, password) {
   // 아이디와 비밀번호로 사용자 찾기
@@ -721,11 +779,33 @@ function login(username, password) {
     closeAuthModal();
     updateAuthUI();
 
-    // LocalStorage 데이터를 서버로 업로드
+    // LocalStorage 데이터를 서버로 업로드 (로그인 전 작성한 데이터가 있을 경우)
     uploadLocalDataToServer();
 
-    // 히어로 캐러셀 새로고침
-    loadHeroCarousel();
+    // 서버에 저장된 프로필 확인
+    const serverKey = `server_${currentUser.username}_profile`;
+    const serverData = localStorage.getItem(serverKey);
+
+    if (serverData) {
+      // 서버에 프로필이 있으면 로드하고 메인 콘텐츠 표시
+      localStorage.setItem('userProfile', serverData);
+      console.log('✅ 서버 프로필 로드 완료');
+
+      // 메인 콘텐츠가 이미 로드되어 있으면 새로고침
+      if (document.querySelector('#heroCarouselTrack').children.length > 0) {
+        loadHeroCarousel();
+        loadDailyRecommendations();
+      } else {
+        initializeMainContent();
+      }
+    } else {
+      // 서버에 프로필이 없으면 팝업 표시
+      console.log('✅ 서버 프로필 없음: 팝업 표시');
+      const popupFrame = document.getElementById('popupFrame');
+      if (popupFrame) {
+        popupFrame.style.display = 'block';
+      }
+    }
   } else {
     alert('아이디 또는 비밀번호가 일치하지 않습니다.');
   }
@@ -864,6 +944,7 @@ if (goToLoginBtn) {
 window.addEventListener('click', (e) => {
   const authModal = document.getElementById('authModal');
   const watchlistModal = document.getElementById('watchlistLoginModal');
+  const profileModal = document.getElementById('profileModal');
 
   if (e.target === authModal) {
     closeAuthModal();
@@ -871,4 +952,164 @@ window.addEventListener('click', (e) => {
   if (e.target === watchlistModal) {
     closeWatchlistLoginModal();
   }
+  if (e.target === profileModal) {
+    closeProfileModal();
+  }
 });
+
+/* ============================================
+   프로필 버튼 및 모달 관리
+   ============================================ */
+
+// 프로필 버튼 클릭 이벤트
+const profileBtn = document.getElementById('profileBtn');
+if (profileBtn) {
+  profileBtn.addEventListener('click', () => {
+    if (!currentUser) {
+      alert('로그인이 필요합니다.');
+      openAuthModal('login');
+    } else {
+      openProfileModal();
+    }
+  });
+}
+
+/* ============================================
+   프로필 모달 열기
+   - 사용자 프로필 데이터 표시
+   ============================================ */
+function openProfileModal() {
+  const modal = document.getElementById('profileModal');
+
+  // 프로필 데이터 로드
+  const userProfile = localStorage.getItem('userProfile');
+
+  if (userProfile) {
+    const profile = JSON.parse(userProfile);
+    displayProfileData(profile);
+  } else {
+    // 프로필이 없으면 빈 상태 표시
+    displayEmptyProfile();
+  }
+
+  modal.style.display = 'flex';
+}
+
+/* ============================================
+   프로필 모달 닫기
+   ============================================ */
+function closeProfileModal() {
+  const modal = document.getElementById('profileModal');
+  modal.style.display = 'none';
+}
+
+// 프로필 모달 닫기 버튼
+const profileModalClose = document.querySelector('#profileModal .modal-close');
+if (profileModalClose) {
+  profileModalClose.addEventListener('click', closeProfileModal);
+}
+
+/* ============================================
+   프로필 데이터 표시
+   ============================================ */
+function displayProfileData(profile) {
+  // 장르 정보 표시
+  const genresContainer = document.getElementById('profileGenres');
+  if (profile.genres && profile.genres.length > 0) {
+    genresContainer.innerHTML = profile.genres
+      .map(genre => `<span class="profile-tag">${getGenreKoreanName(genre)}</span>`)
+      .join('');
+  } else {
+    genresContainer.innerHTML = '<span class="profile-empty">선호 장르 정보가 없습니다.</span>';
+  }
+
+  // 무드 정보 표시
+  const moodContainer = document.getElementById('profileMood');
+  if (profile.mood) {
+    moodContainer.innerHTML = `<span class="profile-tag">${getMoodKoreanName(profile.mood)}</span>`;
+  } else {
+    moodContainer.innerHTML = '<span class="profile-empty">무드 정보가 없습니다.</span>';
+  }
+
+  // 불호 요소 표시
+  const dislikesContainer = document.getElementById('profileDislikes');
+  if (profile.dislikes && profile.dislikes.length > 0) {
+    dislikesContainer.innerHTML = profile.dislikes
+      .map(dislike => `<span class="profile-tag">${getDislikeKoreanName(dislike)}</span>`)
+      .join('');
+  } else {
+    dislikesContainer.innerHTML = '<span class="profile-empty">불호 요소 정보가 없습니다.</span>';
+  }
+}
+
+/* ============================================
+   빈 프로필 표시
+   ============================================ */
+function displayEmptyProfile() {
+  document.getElementById('profileGenres').innerHTML = '<span class="profile-empty">선호 장르 정보가 없습니다.</span>';
+  document.getElementById('profileMood').innerHTML = '<span class="profile-empty">무드 정보가 없습니다.</span>';
+  document.getElementById('profileDislikes').innerHTML = '<span class="profile-empty">불호 요소 정보가 없습니다.</span>';
+}
+
+/* ============================================
+   장르/무드/불호 한글 이름 매핑
+   ============================================ */
+function getGenreKoreanName(genre) {
+  const genreMap = {
+    action: '액션',
+    adventure: '모험',
+    comedy: '코미디',
+    drama: '드라마',
+    horror: '공포',
+    scifi: 'SF',
+    romance: '로맨스',
+    thriller: '스릴러',
+    animation: '애니메이션',
+    fantasy: '판타지',
+    mystery: '미스터리',
+    crime: '범죄',
+    documentary: '다큐멘터리',
+    family: '가족',
+    music: '음악',
+    war: '전쟁',
+    western: '서부'
+  };
+  return genreMap[genre] || genre;
+}
+
+function getMoodKoreanName(mood) {
+  const moodMap = {
+    happy: '밝고 즐거운',
+    dark: '어둡고 무거운',
+    emotional: '감동적인',
+    intense: '긴장감 넘치는',
+    thoughtful: '생각을 자극하는'
+  };
+  return moodMap[mood] || mood;
+}
+
+function getDislikeKoreanName(dislike) {
+  const dislikeMap = {
+    violence: '폭력적인 장면',
+    horror: '공포 요소',
+    sad: '슬픈 결말',
+    slow: '느린 전개',
+    complex: '복잡한 줄거리'
+  };
+  return dislikeMap[dislike] || dislike;
+}
+
+/* ============================================
+   프로필 수정 버튼 클릭
+   - 팝업을 다시 열어서 설문 수정 가능
+   ============================================ */
+const editProfileBtn = document.getElementById('editProfileBtn');
+if (editProfileBtn) {
+  editProfileBtn.addEventListener('click', () => {
+    closeProfileModal();
+    const popupFrame = document.getElementById('popupFrame');
+    if (popupFrame) {
+      popupFrame.style.display = 'block';
+    }
+  });
+}

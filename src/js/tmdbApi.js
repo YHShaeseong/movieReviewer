@@ -839,3 +839,50 @@ const tmdbApi = new TMDBApiService();
 if (typeof window !== 'undefined') {
   window.tmdbApi = tmdbApi;
 }
+
+
+// vddeo   preview 
+// https://api.themoviedb.org/3/movie/{movie_id}/videos
+
+/* const options = {
+  method: 'GET',
+  headers: {
+    accept: 'application/json',
+    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmMzI1YTY5NzliMmUyNmRiMGM1ZWUyNDIwZDBmMzEzOCIsIm5iZiI6MTc2MjE1NTY0MC4wMDcsInN1YiI6IjY5MDg1Yzc4NGQ0ZDdkYzlhYTU5ODg4ZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.tXYlaIIml1lr3ZoFa6CqWtKkXTgyWTVdSjAS6wjDv5I'
+  }
+};
+
+fetch('https://api.themoviedb.org/3/movie/movie_id/videos?language=en-US', options)
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.error(err)); */
+
+  /* {
+  "id": 550,
+  "results": [
+    {
+      "iso_639_1": "en",
+      "iso_3166_1": "US",
+      "name": "Fight Club (1999) Trailer - Starring Brad Pitt, Edward Norton, Helena Bonham Carter",
+      "key": "O-b2VfmmbyA",
+      "site": "YouTube",
+      "size": 720,
+      "type": "Trailer",
+      "official": false,
+      "published_at": "2016-03-05T02:03:14.000Z",
+      "id": "639d5326be6d88007f170f44"
+    },
+    {
+      "iso_639_1": "en",
+      "iso_3166_1": "US",
+      "name": "#TBT Trailer",
+      "key": "BdJKm16Co6M",
+      "site": "YouTube",
+      "size": 1080,
+      "type": "Trailer",
+      "official": true,
+      "published_at": "2014-10-02T19:20:22.000Z",
+      "id": "5c9294240e0a267cd516835f"
+    }
+  ]
+} */
