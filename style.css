@@ -1,0 +1,633 @@
+/* ============================================
+   전역 설정 - 모든 요소에 적용되는 기본 스타일
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0a0a0a; /* 어두운 배경색 */
+  color: white;
+}
+
+/* ============================================
+   헤더 영역 - 상단 네비게이션
+   수정 포인트: 로고 크기, 검색창 너비, 버튼 색상
+   ============================================ */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  background-color: white;
+  color: black;
+}
+
+/* 로고 스타일 */
+.logo {
+  font-size: 24px; /* 로고 크기 조절 */
+  font-weight: bold;
+  color: #2563eb; /* 파란색 */
+}
+
+/* 검색창 스타일 */
+#searchInput {
+  width: 400px; /* 검색창 너비 조절 */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* 네비게이션 메뉴 */
+.header nav {
+  display: flex;
+  gap: 20px; /* 메뉴 간격 */
+  align-items: center;
+}
+
+.header nav a {
+  color: black;
+  text-decoration: none;
+}
+
+/* 로그인 버튼 */
+.login-btn {
+  background-color: #2563eb; /* 버튼 배경색 */
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* ============================================
+   히어로 섹션 - 메인 배너
+   수정 포인트: 배경색, 높이, 텍스트 크기
+   ============================================ */
+.hero {
+  position: relative;
+  height: 500px; /* 배너 높이 */
+  background: linear-gradient(to right, #4a0000, #1a0000); /* 그라데이션 배경 */
+  padding: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.hero-content {
+  max-width: 600px;
+}
+
+/* 인기 배지 */
+.badge {
+  background-color: #2563eb;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+/* 영화 제목 */
+.hero-title {
+  font-size: 48px; /* 제목 크기 */
+  margin: 20px 0;
+}
+
+/* 영화 정보 (평점, 연도, 장르) */
+.hero-info {
+  color: #fbbf24; /* 노란색 */
+  margin: 10px 0;
+}
+
+/* 영화 설명 */
+.hero-desc {
+  margin: 20px 0;
+  color: #d1d5db; /* 회색 */
+}
+
+/* 버튼 그룹 */
+.hero-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+/* 예고편 보기 버튼 */
+.btn-play {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* 상세정보 버튼 */
+.btn-info {
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 12px 30px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* 평점 표시 (오른쪽 하단) */
+.hero-rating {
+  position: absolute;
+  bottom: 30px;
+  right: 60px;
+  background-color: #2563eb;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 18px;
+}
+
+/* ============================================
+   추천 섹션 - 장르 선택
+   수정 포인트: 버튼 색상, 간격, 크기
+   ============================================ */
+.recommendation {
+  text-align: center;
+  padding: 60px 40px;
+  background-color: #f9fafb; /* 밝은 배경 */
+  color: black;
+}
+
+.recommendation h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.recommendation p {
+  color: #6b7280;
+  margin-bottom: 30px;
+}
+
+/* 장르 버튼 그룹 */
+.genre-filter {
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* 버튼 간격 */
+  flex-wrap: wrap;
+}
+
+/* 장르 버튼 스타일 */
+.genre-btn {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  padding: 15px 30px; /* 버튼 크기 */
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* 장르 버튼 호버 효과 */
+.genre-btn:hover {
+  background-color: #eff6ff; /* 연한 파란색 */
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+/* ============================================
+   TOP100 섹션 - 영화 목록
+   수정 포인트: 그리드 개수, 간격
+   ============================================ */
+.top100 {
+  padding: 60px 40px;
+  background-color: white;
+  color: black;
+}
+
+/* 섹션 헤더 (제목 + 전체보기 링크) */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.section-header h2 {
+  font-size: 32px;
+}
+
+.view-all {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.top100 > p {
+  color: #6b7280;
+  margin-bottom: 30px;
+}
+
+/* ============================================
+   영화 그리드 - 영화 카드 레이아웃
+   수정 포인트: 열 개수(repeat 값), 간격(gap)
+   ============================================ */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5개 열 (1fr은 동일 너비) */
+  gap: 20px; /* 카드 간격 */
+}
+
+/* 영화 카드 */
+.movie_item {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* 영화 포스터 이미지 */
+.movie_item img {
+  width: 100%;
+  height: 350px; /* 이미지 높이 */
+  object-fit: cover;
+}
+
+/* 순위 배지 (왼쪽 상단) */
+.rank-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #fbbf24; /* 노란색 */
+  color: black;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+/* 평점 배지 (오른쪽 상단) */
+.rating-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: black;
+  color: #fbbf24;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+/* 영화 정보 영역 */
+.movie-info {
+  padding: 15px;
+  background-color: #f9fafb;
+}
+
+/* 영화 제목 */
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+/* 영화 메타 정보 (연도, 장르) */
+.movie-meta {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* 영화 통계 (좋아요, 평점) */
+.movie-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.likes {
+  color: #6b7280;
+}
+
+.star-rating {
+  color: #fbbf24; /* 노란색 별 */
+}
+
+/* ============================================
+   푸터 영역
+   수정 포인트: 배경색, 링크 색상
+   ============================================ */
+.footer {
+  background-color: #f9fafb;
+  color: black;
+  padding: 60px 40px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 푸터 로고 */
+.footer-logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2563eb;
+  margin-bottom: 15px;
+}
+
+.footer-content > p {
+  color: #6b7280;
+  margin-bottom: 30px;
+  max-width: 600px;
+}
+
+/* 푸터 링크 그룹 */
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2개 열 */
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.link-group h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.link-group a {
+  display: block;
+  color: #6b7280;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+/* SNS 링크 */
+.footer-social {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.footer-social span {
+  color: #6b7280;
+  cursor: pointer;
+}
+
+/* 저작권 표시 */
+.copyright {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* ============================================
+   취향 확인 팝업
+   ============================================ */
+.preference-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: none;
+}
+
+.preference-popup.active {
+  display: block;
+}
+
+.popup-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.popup-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #e8e8e8;
+  border-radius: 20px;
+  padding: 50px 40px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.popup-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #6b7280;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.popup-close:hover {
+  color: #2563eb;
+}
+
+/* 질문 단계 스타일 */
+.popup-step {
+  color: black;
+}
+
+.popup-question h2 {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: black;
+  line-height: 1.3;
+}
+
+.popup-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.option-btn {
+  background-color: #d1d1d1;
+  border: none;
+  padding: 18px 25px;
+  border-radius: 15px;
+  font-size: 18px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: black;
+}
+
+.option-btn.selected {
+  background-color: #1e3a5f;
+  color: white;
+}
+
+.option-btn:hover {
+  background-color: #c0c0c0;
+}
+
+.option-btn.selected:hover {
+  background-color: #2d4a6f;
+}
+
+/* 진행 바 */
+.popup-progress {
+  margin-bottom: 30px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #c0c0c0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #2563eb;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1e3a5f;
+}
+
+/* 네비게이션 버튼 */
+.popup-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.btn-prev, .btn-next {
+  flex: 1;
+  background-color: #1e3a5f;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-prev:disabled {
+  background-color: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-prev:hover:not(:disabled), .btn-next:hover {
+  background-color: #2d4a6f;
+}
+
+/* 결과 페이지 스타일 */
+.popup-result {
+  color: black;
+}
+
+.result-content {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 30px;
+  align-items: flex-start;
+}
+
+.result-movie {
+  flex-shrink: 0;
+}
+
+.result-poster {
+  width: 140px;
+  height: 200px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.result-movie h3 {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.result-text h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.result-text p {
+  font-size: 14px;
+  color: #4a4a4a;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.result-genres {
+  margin-bottom: 20px;
+}
+
+.genre-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.genre-label {
+  width: 60px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.genre-progress {
+  flex: 1;
+  height: 20px;
+  background-color: #c0c0c0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.genre-fill {
+  height: 100%;
+  background-color: #2563eb;
+  transition: width 0.5s;
+}
+
+.result-footer {
+  font-size: 14px;
+  color: #4a4a4a;
+  margin-top: 15px;
+}
+
+.result-button {
+  text-align: center;
+}
+
+.btn-start {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 15px 60px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-start:hover {
+  background-color: #1d4ed8;
+}

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MovieFinder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ==================== 취향 확인 팝업 섹션 ==================== -->
+  <section class="preference-popup" id="preferencePopup">
+    <div class="popup-overlay"></div>
+    <div class="popup-container">
+      <button class="popup-close" id="popupClose">&times;</button>
+
+      <!-- 질문 1: 최근 재밌게 본 영화 -->
+      <div class="popup-step" data-step="1">
+        <div class="popup-question">
+          <h2>Q. 최근 재밌게 본 영화는?</h2>
+        </div>
+        <div class="popup-options">
+          <button class="option-btn" data-value="체인소맨">1 체인소 맨</button>
+          <button class="option-btn" data-value="Black Mirror">2 Black Mirror</button>
+          <button class="option-btn" data-value="폭삭 속았수다">3 폭삭 속았수다</button>
+        </div>
+        <div class="popup-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 20%"></div>
+          </div>
+          <div class="progress-text">1/5</div>
+        </div>
+        <div class="popup-nav">
+          <button class="btn-prev" disabled>이전</button>
+          <button class="btn-next">다음</button>
+        </div>
+      </div>
+
+      <!-- 질문 2: 선호하는 영화 장르 -->
+      <div class="popup-step" data-step="2" style="display: none;">
+        <div class="popup-question">
+          <h2>Q. 선호하는 영화 장르는?</h2>
+        </div>
+        <div class="popup-options">
+          <button class="option-btn" data-value="액션">1 액션</button>
+          <button class="option-btn" data-value="SF">2 SF</button>
+          <button class="option-btn" data-value="로맨스">3 로맨스</button>
+          <button class="option-btn" data-value="스릴러">4 스릴러</button>
+        </div>
+        <div class="popup-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 40%"></div>
+          </div>
+          <div class="progress-text">2/5</div>
+        </div>
+        <div class="popup-nav">
+          <button class="btn-prev">이전</button>
+          <button class="btn-next">다음</button>
+        </div>
+      </div>
+
+      <!-- 질문 3: 영화 시청 목적 -->
+      <div class="popup-step" data-step="3" style="display: none;">
+        <div class="popup-question">
+          <h2>Q. 영화를 보는 주된 목적은?</h2>
+        </div>
+        <div class="popup-options">
+          <button class="option-btn" data-value="재미">1 재미와 오락</button>
+          <button class="option-btn" data-value="감동">2 감동과 여운</button>
+          <button class="option-btn" data-value="정보">3 정보와 지식</button>
+        </div>
+        <div class="popup-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 60%"></div>
+          </div>
+          <div class="progress-text">3/5</div>
+        </div>
+        <div class="popup-nav">
+          <button class="btn-prev">이전</button>
+          <button class="btn-next">다음</button>
+        </div>
+      </div>
+
+      <!-- 질문 4: 선호하는 영화 분위기 -->
+      <div class="popup-step" data-step="4" style="display: none;">
+        <div class="popup-question">
+          <h2>Q. 선호하는 영화 분위기는?</h2>
+        </div>
+        <div class="popup-options">
+          <button class="option-btn" data-value="밝고 경쾌함">1 밝고 경쾌함</button>
+          <button class="option-btn" data-value="어둡고 무거움">2 어둡고 무거움</button>
+          <button class="option-btn" data-value="긴장감 있음">3 긴장감 있음</button>
+        </div>
+        <div class="popup-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 80%"></div>
+          </div>
+          <div class="progress-text">4/5</div>
+        </div>
+        <div class="popup-nav">
+          <button class="btn-prev">이전</button>
+          <button class="btn-next">다음</button>
+        </div>
+      </div>
+
+      <!-- 질문 5: 영화 러닝타임 선호도 -->
+      <div class="popup-step" data-step="5" style="display: none;">
+        <div class="popup-question">
+          <h2>Q. 선호하는 영화 러닝타임은?</h2>
+        </div>
+        <div class="popup-options">
+          <button class="option-btn" data-value="90분 이하">1 90분 이하 (짧고 간결)</button>
+          <button class="option-btn" data-value="90-120분">2 90-120분 (적당함)</button>
+          <button class="option-btn" data-value="120분 이상">3 120분 이상 (긴 호흡)</button>
+        </div>
+        <div class="popup-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+          <div class="progress-text">5/5</div>
+        </div>
+        <div class="popup-nav">
+          <button class="btn-prev">이전</button>
+          <button class="btn-next">다음</button>
+        </div>
+      </div>
+
+      <!-- 결과 페이지 -->
+      <div class="popup-result" style="display: none;">
+        <div class="result-content">
+          <div class="result-movie">
+            <img src="https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="인터스텔라" class="result-poster">
+            <h3>인터스텔라</h3>
+          </div>
+          <div class="result-text">
+            <h2>'<span id="resultMovieName">인터스텔라</span>'를 인생 영화로 꼽으셨군요.</h2>
+            <p id="resultDescription">압도적인 영상미(SF)와 가슴을 울리는 서사(드라마)가 완벽하게 결합된조.</p>
+            <div class="result-genres">
+              <div class="genre-bar">
+                <span class="genre-label">SF</span>
+                <div class="genre-progress">
+                  <div class="genre-fill" style="width: 90%"></div>
+                </div>
+              </div>
+              <div class="genre-bar">
+                <span class="genre-label">드라마</span>
+                <div class="genre-progress">
+                  <div class="genre-fill" style="width: 70%"></div>
+                </div>
+              </div>
+              <div class="genre-bar">
+                <span class="genre-label">액션</span>
+                <div class="genre-progress">
+                  <div class="genre-fill" style="width: 40%"></div>
+                </div>
+              </div>
+            </div>
+            <p class="result-footer">같은 여운과 생각할 거리를 주는 영화를 선호하는 분입니다.</p>
+          </div>
+        </div>
+        <div class="result-button">
+          <button class="btn-start" id="btnStart">시작하기</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <!-- ==================== 취향 확인 팝업 섹션 끝 ==================== -->
+
+  <!-- 헤더: 로고, 검색, 메뉴 -->
+  <header class="header">
+    <div class="logo">MovieFinder</div>
+    <input type="text" id="searchInput" placeholder="영화 제목, 배우, 감독을 검색하세요...">
+    <nav>
+      <a href="#top100">TOP100 영화</a>
+      <a href="#genres">추천 장르</a>
+      <button class="login-btn">로그인</button>
+    </nav>
+  </header>
+
+  <!-- 히어로 섹션: 메인 영화 배너 -->
+  <section class="hero">
+    <div class="hero-content">
+      <span class="badge">지금 인기</span>
+      <h1 class="hero-title">오펜하이머</h1>
+      <p class="hero-info">평점 8.8 | 2023 | 드라마, 역사</p>
+      <p class="hero-desc">원자폭탄의 아버지 오펜하이머의 삶을 그린 대작</p>
+      <div class="hero-buttons">
+        <button class="btn-play">예고편 보기</button>
+        <button class="btn-info">상세 정보</button>
+      </div>
+    </div>
+    <div class="hero-rating">평점 8.8</div>
+  </section>
+
+  <!-- 취향 맞는 영화 추천: 장르 필터 -->
+  <section class="recommendation">
+    <h2>취향에 맞는 영화 추천받기</h2>
+    <p>선호하는 장르를 선택하시면 개인화된 영화를 추천해드립니다</p>
+    <div class="genre-filter">
+      <button class="genre-btn" data-genre="action">액션</button>
+      <button class="genre-btn" data-genre="drama">드라마</button>
+      <button class="genre-btn" data-genre="comedy">코미디</button>
+      <button class="genre-btn" data-genre="horror">공포</button>
+      <button class="genre-btn" data-genre="sf">SF</button>
+      <button class="genre-btn" data-genre="romance">로맨스</button>
+      <button class="genre-btn" data-genre="thriller">스릴러</button>
+      <button class="genre-btn" data-genre="animation">애니메이션</button>
+    </div>
+  </section>
+
+  <!-- TOP100 영화 랭킹 -->
+  <section class="top100" id="top100">
+    <div class="section-header">
+      <h2>TOP100 영화 랭킹</h2>
+      <a href="#" class="view-all">전체 보기</a>
+    </div>
+    <p>전 세계 관객들이 선택한 최고의 영화들</p>
+    <div id="movies" class="movie-grid"></div>
+  </section>
+
+  <!-- 푸터: 로고, 링크, SNS -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">MovieFinder</div>
+      <p>개인 취향에 맞는 영화를 추천받고, 다양한 리뷰와 평점을 확인할 수 있는 최고의 영화 추천 서비스입니다.</p>
+      <div class="footer-links">
+        <div class="link-group">
+          <h3>빠른 링크</h3>
+          <a href="#">TOP100 영화</a>
+          <a href="#">장르별 영화</a>
+          <a href="#">추천 리뷰</a>
+          <a href="#">신작 영화</a>
+        </div>
+        <div class="link-group">
+          <h3>고객센터</h3>
+          <a href="#">자주 묻는 질문</a>
+          <a href="#">문의하기</a>
+          <a href="#">이용약관</a>
+          <a href="#">개인정보처리방침</a>
+        </div>
+      </div>
+      <div class="footer-social">
+        <span>Facebook</span>
+        <span>Twitter</span>
+        <span>Instagram</span>
+      </div>
+      <p class="copyright">© 2024 MovieFinder. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="./script.js"></script>
+</body>
+</html>
