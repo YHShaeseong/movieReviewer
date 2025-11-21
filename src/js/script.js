@@ -542,18 +542,20 @@ function closeMovieDetailModal() {
   document.getElementById('movieDetailModal').style.display = 'none';
 }
 
-// 스트리밍 서비스 URL 매핑
+// 한국에서 실제 사용 가능한 스트리밍 서비스 URL 매핑
 const STREAMING_URLS = {
   8: { name: 'Netflix', url: 'https://www.netflix.com/search?q=' },
-  337: { name: 'Disney+', url: 'https://www.disneyplus.com/search?q=' },
+  337: { name: 'Disney+', url: 'https://www.disneyplus.com/ko-kr/search?q=' },
   356: { name: 'wavve', url: 'https://www.wavve.com/search?searchWord=' },
   97: { name: 'Watcha', url: 'https://watcha.com/search?query=' },
-  119: { name: 'Amazon Prime', url: 'https://www.primevideo.com/search?phrase=' },
-  350: { name: 'Apple TV+', url: 'https://tv.apple.com/search?term=' },
-  2: { name: 'Apple TV', url: 'https://tv.apple.com/search?term=' },
-  3: { name: 'Google Play', url: 'https://play.google.com/store/search?q=' },
-  192: { name: 'YouTube', url: 'https://www.youtube.com/results?search_query=' },
-  96: { name: 'Naver Store', url: 'https://serieson.naver.com/search?query=' }
+  1796: { name: 'Netflix basic with Ads', url: 'https://www.netflix.com/search?q=' },
+  1899: { name: 'Max', url: 'https://www.max.com/search?q=' },
+  531: { name: 'Paramount+', url: 'https://www.paramountplus.com/search?q=' },
+  350: { name: 'Apple TV+', url: 'https://tv.apple.com/kr/search?term=' },
+  2: { name: 'Apple TV', url: 'https://tv.apple.com/kr/search?term=' },
+  3: { name: 'Google Play 무비', url: 'https://play.google.com/store/search?q=' },
+  68: { name: 'Microsoft Store', url: 'https://www.microsoft.com/ko-kr/search?q=' },
+  96: { name: 'Naver Store', url: 'https://series.naver.com/search/search.series?query=' }
 };
 
 function renderMovieDetail(movie, trailer, watchProviders = null) {
@@ -758,10 +760,12 @@ async function openWatchProvidersModal(movieId, encodedTitle) {
       ...(krProviders.buy || []).map(p => ({ ...p, type: '구매' }))
     ];
 
-    // 중복 제거 (provider_id 기준)
-    const uniqueProviders = allProviders.filter((provider, index, self) =>
-      index === self.findIndex(p => p.provider_id === provider.provider_id)
-    );
+    // 중복 제거 (provider_id 기준) + 알려진 서비스만 필터링
+    const uniqueProviders = allProviders
+      .filter((provider, index, self) =>
+        index === self.findIndex(p => p.provider_id === provider.provider_id)
+      )
+      .filter(provider => STREAMING_URLS[provider.provider_id]);
 
     if (uniqueProviders.length === 0) {
       alert('이용 가능한 스트리밍 서비스가 없습니다.');
