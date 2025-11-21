@@ -3,66 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MovieFinder</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Pictos</title>
+  <link rel="stylesheet" href="src/css/style.css">
+  <link rel="stylesheet" href="src/css/profile-styles.css">
 </head>
 <body>
+  <!-- ==================== 취향 확인 팝업 (iframe) ==================== -->
+  <iframe id="popupFrame" src="/src/pages/popup.html" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 10000;"></iframe>
+  <!-- ==================== 취향 확인 팝업 끝 ==================== -->
+
   <!-- 헤더: 로고, 검색, 메뉴 -->
   <header class="header">
-    <div class="logo">MovieFinder</div>
+    <div class="logo">Pictos</div>
     <input type="text" id="searchInput" placeholder="영화 제목, 배우, 감독을 검색하세요...">
     <nav>
       <a href="#top100">TOP100 영화</a>
       <a href="#genres">추천 장르</a>
+      <button id="watchlistBtn" class="watchlist-btn">Watchlist</button>
       <button class="login-btn">로그인</button>
+      <span id="userInfo" class="user-info" style="display: none;">
+        <button id="profileBtn" class="profile-btn" title="프로필">
+          <span class="profile-icon">👤</span>
+        </button>
+        <span id="userName"></span>
+        <button id="logoutBtn" class="logout-btn">로그아웃</button>
+      </span>
     </nav>
   </header>
 
-  <!-- 히어로 섹션: 메인 영화 배너 -->
-  <section class="hero">
-    <div class="hero-content">
-      <span class="badge">지금 인기</span>
-      <h1 class="hero-title">오펜하이머</h1>
-      <p class="hero-info">평점 8.8 | 2023 | 드라마, 역사</p>
-      <p class="hero-desc">원자폭탄의 아버지 오펜하이머의 삶을 그린 대작</p>
-      <div class="hero-buttons">
-        <button class="btn-play">예고편 보기</button>
-        <button class="btn-info">상세 정보</button>
+  <!-- 로그인/회원가입 모달 -->
+  <div id="authModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <h2 id="authTitle">로그인</h2>
+      <form id="authForm">
+        <input type="text" id="authUsername" placeholder="아이디" required>
+        <input type="password" id="authPassword" placeholder="비밀번호" required>
+        <button type="submit" id="authSubmitBtn">로그인</button>
+        <p class="auth-switch">
+          <span id="authSwitchText">계정이 없으신가요?</span>
+          <a href="#" id="authSwitchLink">회원가입</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Watchlist 로그인 필요 모달 -->
+  <div id="watchlistLoginModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <h2>로그인이 필요합니다</h2>
+      <p>지금까지의 취향 정보와 저장 목록을 모두 보관할 수 있어요!</p>
+      <button id="goToLoginBtn" class="btn-primary">로그인하러 가기</button>
+    </div>
+  </div>
+
+  <!-- 프로필 모달 -->
+  <div id="profileModal" class="modal" style="display: none;">
+    <div class="modal-content profile-modal-content">
+      <span class="modal-close">&times;</span>
+      <h2>내 프로필</h2>
+      <div class="profile-info">
+        <div class="profile-section">
+          <h3>선호하는 장르</h3>
+          <div id="profileGenres" class="profile-tags"></div>
+        </div>
+        <div class="profile-section">
+          <h3>선호하는 무드</h3>
+          <div id="profileMood" class="profile-tags"></div>
+        </div>
+        <div class="profile-section">
+          <h3>불호 요소</h3>
+          <div id="profileDislikes" class="profile-tags"></div>
+        </div>
+      </div>
+      <button id="editProfileBtn" class="btn-primary">프로필 수정</button>
+    </div>
+  </div>
+
+  <!-- 히어로 섹션: 추천 영화 캐러셀 -->
+  <section class="hero-carousel" id="heroCarousel">
+    <button class="hero-nav-btn prev" id="heroPrev">‹</button>
+    <button class="hero-nav-btn next" id="heroNext">›</button>
+
+    <div class="hero-carousel-container">
+      <div class="hero-carousel-track" id="heroCarouselTrack">
+        <!-- JavaScript에서 동적으로 생성됨 -->
       </div>
     </div>
-    <div class="hero-rating">평점 8.8</div>
-  </section>
 
-  <!-- 취향 맞는 영화 추천: 장르 필터 -->
-  <section class="recommendation">
-    <h2>취향에 맞는 영화 추천받기</h2>
-    <p>선호하는 장르를 선택하시면 개인화된 영화를 추천해드립니다</p>
-    <div class="genre-filter">
-      <button class="genre-btn" data-genre="action">액션</button>
-      <button class="genre-btn" data-genre="drama">드라마</button>
-      <button class="genre-btn" data-genre="comedy">코미디</button>
-      <button class="genre-btn" data-genre="horror">공포</button>
-      <button class="genre-btn" data-genre="sf">SF</button>
-      <button class="genre-btn" data-genre="romance">로맨스</button>
-      <button class="genre-btn" data-genre="thriller">스릴러</button>
-      <button class="genre-btn" data-genre="animation">애니메이션</button>
+    <div class="hero-carousel-dots" id="heroCarouselDots">
+      <!-- JavaScript에서 동적으로 생성됨 -->
     </div>
   </section>
 
-  <!-- TOP100 영화 랭킹 -->
+  <!-- 오늘 이건 어떤데? 섹션 -->
+  <section class="daily-recommendation">
+    <div class="section-header">
+      <div>
+        <h2>오늘 이건 어떤데?</h2>
+        <p>당신의 취향을 바탕으로 골랐어요</p>
+      </div>
+    </div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-btn prev" id="dailyPrev">‹</button>
+      <div class="horizontal-scroll" id="dailyMovieScroll">
+        <!-- JavaScript에서 동적으로 생성됨 -->
+      </div>
+      <button class="scroll-btn next" id="dailyNext">›</button>
+    </div>
+  </section>
+
+  <!-- 인기 영화 TOP100 -->
   <section class="top100" id="top100">
     <div class="section-header">
-      <h2>TOP100 영화 랭킹</h2>
-      <a href="#" class="view-all">전체 보기</a>
+      <h2>지금 가장 인기있는 영화</h2>
     </div>
-    <p>전 세계 관객들이 선택한 최고의 영화들</p>
+    <p>실시간으로 가장 많은 사람들이 찾는 영화들</p>
     <div id="movies" class="movie-grid"></div>
+    <div class="view-more-container">
+      <button id="viewMoreBtn" class="view-more-btn" style="display: none;">
+        더보기 (100개 전체보기)
+      </button>
+    </div>
   </section>
 
   <!-- 푸터: 로고, 링크, SNS -->
   <footer class="footer">
     <div class="footer-content">
-      <div class="footer-logo">MovieFinder</div>
+      <div class="footer-logo">Pictos</div>
       <p>개인 취향에 맞는 영화를 추천받고, 다양한 리뷰와 평점을 확인할 수 있는 최고의 영화 추천 서비스입니다.</p>
       <div class="footer-links">
         <div class="link-group">
@@ -85,10 +154,13 @@
         <span>Twitter</span>
         <span>Instagram</span>
       </div>
-      <p class="copyright">© 2024 MovieFinder. All rights reserved.</p>
+      <p class="copyright">© 2024 Pictos. All rights reserved.</p>
     </div>
   </footer>
 
-  <script src="./script.js"></script>
+  <!-- TMDB API 모듈 먼저 로드 -->
+  <script src="src/js/tmdbApi.js"></script>
+  <!-- 메인 스크립트 -->
+  <script src="src/js/script.js"></script>
 </body>
 </html>
