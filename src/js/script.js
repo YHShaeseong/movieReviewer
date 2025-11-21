@@ -895,6 +895,83 @@ function closeWatchProvidersModal() {
 }
 
 /* ============================================
+   워치리스트 모달
+   ============================================ */
+
+function openWatchlistModal() {
+  const watchlist = getWatchlist();
+
+  // 모달 생성
+  let modal = document.getElementById('watchlistModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'watchlistModal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content watchlist-modal">
+        <span class="modal-close" onclick="closeWatchlistModal()">&times;</span>
+        <h2>🔖 내 워치리스트</h2>
+        <div id="watchlistContent" class="watchlist-content"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.onclick = (e) => e.target === modal && closeWatchlistModal();
+  }
+
+  // 워치리스트 내용 렌더링
+  const content = document.getElementById('watchlistContent');
+
+  if (watchlist.length === 0) {
+    content.innerHTML = `
+      <div class="watchlist-empty">
+        <p>🏷️ 아직 저장한 영화가 없습니다.</p>
+        <p>영화 카드의 북마크 아이콘을 눌러 추가해보세요!</p>
+      </div>
+    `;
+  } else {
+    content.innerHTML = `
+      <p class="watchlist-count">총 ${watchlist.length}개의 영화</p>
+      <div class="watchlist-items">
+        ${watchlist.map(movie => `
+          <div class="watchlist-item" data-movie-id="${movie.id}">
+            <img src="${movie.image}" alt="${movie.title}"
+                 onclick="closeWatchlistModal(); openMovieDetailModal(${movie.id});"
+                 onerror="this.src='https://via.placeholder.com/60x90?text=No+Image'">
+            <div class="watchlist-item-info">
+              <div class="watchlist-item-title">${movie.title}</div>
+              <div class="watchlist-item-meta">${movie.year || ''} · ★ ${movie.rating}</div>
+            </div>
+            <button class="watchlist-item-remove" onclick="removeFromWatchlistModal(${movie.id}, '${encodeURIComponent(movie.title)}')" title="삭제">
+              ✕
+            </button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeWatchlistModal() {
+  const modal = document.getElementById('watchlistModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function removeFromWatchlistModal(movieId, encodedTitle) {
+  const title = decodeURIComponent(encodedTitle);
+  const watchlist = getWatchlist();
+  const index = watchlist.findIndex(m => m.id === movieId);
+
+  if (index > -1) {
+    watchlist.splice(index, 1);
+    saveWatchlist(watchlist);
+    updateWatchlistIcons();
+    openWatchlistModal(); // 모달 갱신
+  }
+}
+
+/* ============================================
    프로필 표시
    ============================================ */
 
@@ -1279,7 +1356,7 @@ function setupEventListeners() {
   const watchlistBtn = document.getElementById('watchlistBtn');
   if (watchlistBtn) {
     watchlistBtn.onclick = () => {
-      currentUser ? alert('Watchlist 페이지 기능은 준비 중입니다.') : openWatchlistLoginModal();
+      currentUser ? openWatchlistModal() : openWatchlistLoginModal();
     };
   }
 

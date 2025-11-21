@@ -2479,6 +2479,136 @@ body {
   color: var(--accent-cyan);
 }
 
+/* ============================================
+   워치리스트 모달
+   ============================================ */
+.watchlist-modal {
+  max-width: 400px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.watchlist-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.watchlist-count {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.watchlist-items {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  padding-right: 8px;
+}
+
+.watchlist-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.watchlist-items::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+  border-radius: 3px;
+}
+
+.watchlist-items::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.watchlist-items::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+.watchlist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--bg-dark);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.watchlist-item:hover {
+  background: var(--bg-secondary);
+}
+
+.watchlist-item img {
+  width: 50px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.watchlist-item img:hover {
+  transform: scale(1.05);
+}
+
+.watchlist-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.watchlist-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.watchlist-item-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.watchlist-item-remove {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.watchlist-item-remove:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.watchlist-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+}
+
+.watchlist-empty p {
+  margin-bottom: 8px;
+}
+
+.watchlist-empty p:first-child {
+  font-size: 24px;
+}
+
 /* 로딩 상태 */
 .movie-detail-loading {
   display: flex;
