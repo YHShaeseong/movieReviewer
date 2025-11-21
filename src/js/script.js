@@ -369,7 +369,8 @@ async function loadDailyRecommendations() {
 
     if (savedProfile) {
       const profile = enrichProfileWithDislikedGenres(JSON.parse(savedProfile));
-      const randomPage = Math.floor(Math.random() * 2) + 2;
+      // 1페이지 위주로 가져오되, 가끔 2페이지도 섞기
+      const randomPage = Math.random() < 0.7 ? 1 : 2;
       const data = await tmdbApi.getPersonalizedRecommendations({ ...profile, page: randomPage });
       movieList = data.results.slice(0, CONFIG.DAILY_MOVIES_COUNT);
     } else {

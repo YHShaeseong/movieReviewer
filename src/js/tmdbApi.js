@@ -308,7 +308,8 @@ class TMDBApiService {
     const filters = {
       page: userProfile.page || 1,
       sort_by: userProfile.sortBy || 'popularity.desc',
-      'vote_count.gte': 100  // 평점 수 100개 이상만 추천
+      'vote_count.gte': 1000,  // 평점 수 1000개 이상 (유명한 영화만)
+      'vote_average.gte': 6.0  // 최소 평점 6.0 이상
     };
 
     // 선호 장르
@@ -321,7 +322,7 @@ class TMDBApiService {
       filters.without_genres = userProfile.dislikedGenres.join(',');
     }
 
-    // 평점 필터
+    // 평점 필터 (사용자 지정이 있으면 덮어쓰기)
     if (userProfile.minRating) {
       filters['vote_average.gte'] = userProfile.minRating;
     }
