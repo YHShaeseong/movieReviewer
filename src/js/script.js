@@ -497,31 +497,121 @@ function displayProfileData(profile) {
   const containers = {
     genres: document.getElementById('profileGenres'),
     mood: document.getElementById('profileMood'),
-    dislikes: document.getElementById('profileDislikes')
+    dislikes: document.getElementById('profileDislikes'),
+    exploration: document.getElementById('profileExploration'),
+    ratedMovies: document.getElementById('profileRatedMovies'),
+    username: document.getElementById('profileUsername'),
+    joinDate: document.getElementById('profileJoinDate'),
+    genreCount: document.getElementById('profileGenreCount'),
+    ratingCount: document.getElementById('profileRatingCount'),
+    avgRating: document.getElementById('profileAvgRating')
   };
 
+  // 사용자 정보
+  if (containers.username && currentUser) {
+    containers.username.textContent = currentUser.username;
+  }
+  if (containers.joinDate && currentUser?.joinDate) {
+    containers.joinDate.textContent = `가입일: ${new Date(currentUser.joinDate).toLocaleDateString('ko-KR')}`;
+  } else if (containers.joinDate) {
+    containers.joinDate.textContent = '가입일: -';
+  }
+
+  // 통계
+  if (containers.genreCount) {
+    containers.genreCount.textContent = profile.genres?.length || 0;
+  }
+
+  const ratings = profile.ratings || [];
+  if (containers.ratingCount) {
+    containers.ratingCount.textContent = ratings.length;
+  }
+  if (containers.avgRating) {
+    if (ratings.length > 0) {
+      const avg = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
+      containers.avgRating.textContent = avg.toFixed(1);
+    } else {
+      containers.avgRating.textContent = '-';
+    }
+  }
+
+  // 선호 장르 (숫자 ID는 GENRE_MAP, 문자열은 KOREAN_NAMES 사용)
   containers.genres.innerHTML = profile.genres?.length
-    ? profile.genres.map(g => `<span class="profile-tag">${getKoreanName('genre', g)}</span>`).join('')
+    ? profile.genres.map(g => {
+        const name = typeof g === 'number' ? GENRE_MAP[g] : getKoreanName('genre', g);
+        return `<span class="tag">${name || g}</span>`;
+      }).join('')
     : '<span class="profile-empty">선호 장르 정보가 없습니다.</span>';
 
+  // 무드
   containers.mood.innerHTML = profile.mood
-    ? `<span class="profile-tag">${getKoreanName('mood', profile.mood)}</span>`
-    : '<span class="profile-empty">무드 정보가 없습니다.</span>';
+    ? `<span class="tag highlight">${getKoreanName('mood', profile.mood)}</span>`
+    : '<span class="profile-empty">설정되지 않음</span>';
 
+  // 탐색 스타일
+  if (containers.exploration) {
+    const explorationNames = {
+      'popularity.desc': '인기도 (많은 사람들이 본 영화)',
+      'vote_average.desc': '평점 (평가가 좋은 영화)',
+      'release_date.desc': '최신성 (최근 개봉한 영화)',
+      'revenue.desc': '흥행성 (박스오피스 성공작)'
+    };
+    containers.exploration.innerHTML = profile.exploration
+      ? `<span class="tag highlight">${explorationNames[profile.exploration] || profile.exploration}</span>`
+      : '<span class="profile-empty">탐색 기준 정보가 없습니다.</span>';
+  }
+
+  // 불호 요소
   containers.dislikes.innerHTML = profile.dislikes?.length
-    ? profile.dislikes.map(d => `<span class="profile-tag">${getKoreanName('dislike', d)}</span>`).join('')
-    : '<span class="profile-empty">불호 요소 정보가 없습니다.</span>';
+    ? profile.dislikes.map(d => `<span class="tag">${getKoreanName('dislike', d)}</span>`).join('')
+    : '<span class="profile-empty">피하고 싶은 장르 정보가 없습니다.</span>';
+
+  // 평가한 영화
+  if (containers.ratedMovies) {
+    if (ratings.length > 0) {
+      const recentRatings = ratings.slice(-5).reverse();
+      containers.ratedMovies.innerHTML = recentRatings.map(r => `
+        <div class="rated-movie-item">
+          <img class="rated-movie-poster" src="https://image.tmdb.org/t/p/w92${r.poster_path || ''}"
+               alt="${r.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 60%22><rect fill=%22%23333%22 width=%2240%22 height=%2260%22/></svg>'">
+          <div class="rated-movie-info">
+            <div class="rated-movie-title">${r.title}</div>
+            <div class="rated-movie-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      containers.ratedMovies.innerHTML = '<span class="profile-empty">평가한 영화가 없습니다.</span>';
+    }
+  }
 }
 
 function displayEmptyProfile() {
-  ['profileGenres', 'profileMood', 'profileDislikes'].forEach(id => {
-    const messages = {
-      profileGenres: '선호 장르 정보가 없습니다.',
-      profileMood: '무드 정보가 없습니다.',
-      profileDislikes: '불호 요소 정보가 없습니다.'
-    };
-    document.getElementById(id).innerHTML = `<span class="profile-empty">${messages[id]}</span>`;
+  const messages = {
+    profileGenres: '선호 장르 정보가 없습니다.',
+    profileMood: '무드 정보가 없습니다.',
+    profileDislikes: '피하고 싶은 장르 정보가 없습니다.',
+    profileExploration: '탐색 기준 정보가 없습니다.',
+    profileRatedMovies: '평가한 영화가 없습니다.'
+  };
+
+  Object.entries(messages).forEach(([id, msg]) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<span class="profile-empty">${msg}</span>`;
   });
+
+  // 통계 초기화
+  const stats = { profileGenreCount: '0', profileRatingCount: '0', profileAvgRating: '-' };
+  Object.entries(stats).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  });
+
+  // 사용자 정보
+  const usernameEl = document.getElementById('profileUsername');
+  const joinDateEl = document.getElementById('profileJoinDate');
+  if (usernameEl) usernameEl.textContent = currentUser?.username || '게스트';
+  if (joinDateEl) joinDateEl.textContent = '가입일: -';
 }
 
 /* ============================================
@@ -593,7 +683,7 @@ function signup(username, password) {
     return;
   }
 
-  usersDB.push({ username, password });
+  usersDB.push({ username, password, joinDate: new Date().toISOString() });
   localStorage.setItem('usersDB', JSON.stringify(usersDB));
 
   alert('회원가입 성공! 로그인해주세요.');
@@ -707,26 +797,16 @@ window.addEventListener('DOMContentLoaded', () => {
   updateAuthUI();
 
   if (popupFrame) {
-    let shouldShowPopup = false;
-
     if (currentUser) {
+      // 로그인 상태: 팝업 표시 안 함, 서버 데이터 있으면 로드
       const serverData = localStorage.getItem(`server_${currentUser.username}_profile`);
-      if (!serverData) {
-        shouldShowPopup = true;
-      } else {
+      if (serverData) {
         localStorage.setItem('userProfile', serverData);
       }
-    } else {
-      if (!sessionStorage.getItem('popup_shown')) {
-        shouldShowPopup = true;
-        sessionStorage.setItem('popup_shown', 'true');
-      }
-    }
-
-    if (shouldShowPopup) {
-      popupFrame.style.display = 'block';
-    } else {
       initializeMainContent();
+    } else {
+      // 비로그인 상태: 항상 팝업 표시
+      popupFrame.style.display = 'block';
     }
   }
 

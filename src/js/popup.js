@@ -306,6 +306,8 @@ async function loadSecondPopupMovies() {
           } else {
             userProfile.ratings.push({
               movieId: movie.id,
+              title: movie.title,
+              poster_path: movie.poster_path,
               rating: rating,
               genre_ids: movie.genre_ids,
               passed: false

@@ -1788,4 +1788,148 @@ body {
   height: 100%;
 }
 
+/* 프로필 모달 스타일 */
+.profile-modal-content {
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.profile-header-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.profile-user-details h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.profile-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.profile-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 16px 0;
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.profile-section {
+  margin-bottom: 16px;
+}
+
+.profile-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-tags .tag {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.profile-tags .tag.highlight {
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
+  border: none;
+  color: white;
+}
+
+.profile-rated-movies {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.rated-movie-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: var(--bg-dark);
+  border-radius: 8px;
+}
+
+.rated-movie-poster {
+  width: 40px;
+  height: 60px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.rated-movie-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.rated-movie-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rated-movie-rating {
+  font-size: 12px;
+  color: #ffd700;
+}
+
+.profile-info {
+  margin-bottom: 20px;
+}
 

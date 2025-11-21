@@ -64,17 +64,63 @@
       <span class="modal-close">&times;</span>
       <h2>내 프로필</h2>
       <div class="profile-info">
+        <!-- 사용자 기본 정보 -->
+        <div class="profile-header-section">
+          <div class="profile-avatar">👤</div>
+          <div class="profile-user-details">
+            <h3 id="profileUsername">사용자</h3>
+            <p id="profileJoinDate" class="profile-meta">가입일: -</p>
+          </div>
+        </div>
+
+        <div class="profile-divider"></div>
+
+        <!-- 취향 통계 -->
+        <div class="profile-stats">
+          <div class="stat-item">
+            <span class="stat-number" id="profileGenreCount">0</span>
+            <span class="stat-label">선호 장르</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="profileRatingCount">0</span>
+            <span class="stat-label">평가한 영화</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="profileAvgRating">-</span>
+            <span class="stat-label">평균 별점</span>
+          </div>
+        </div>
+
+        <div class="profile-divider"></div>
+
+        <!-- 선호 장르 -->
         <div class="profile-section">
-          <h3>선호하는 장르</h3>
+          <h3>🎬 선호하는 장르</h3>
           <div id="profileGenres" class="profile-tags"></div>
         </div>
+
+        <!-- 선호 무드 -->
         <div class="profile-section">
-          <h3>선호하는 무드</h3>
+          <h3>🎭 선호하는 무드</h3>
           <div id="profileMood" class="profile-tags"></div>
         </div>
+
+        <!-- 탐색 스타일 -->
         <div class="profile-section">
-          <h3>불호 요소</h3>
+          <h3>🔍 영화 선택 기준</h3>
+          <div id="profileExploration" class="profile-tags"></div>
+        </div>
+
+        <!-- 피하고 싶은 장르 -->
+        <div class="profile-section">
+          <h3>🚫 피하고 싶은 장르</h3>
           <div id="profileDislikes" class="profile-tags"></div>
+        </div>
+
+        <!-- 평가한 영화 목록 -->
+        <div class="profile-section">
+          <h3>⭐ 최근 평가한 영화</h3>
+          <div id="profileRatedMovies" class="profile-rated-movies"></div>
         </div>
       </div>
       <button id="editProfileBtn" class="btn-primary">프로필 수정</button>
