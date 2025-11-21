@@ -514,37 +514,22 @@ body {
 
 /* 워치리스트 아이콘 버튼 */
 .watchlist-btn-icon {
-  position: absolute;
-  top: 12px;
-  right: 70px;
-  width: 32px;
-  height: 32px;
-  background: rgba(15, 23, 42, 0.9);
-  backdrop-filter: blur(10px);
-  border: 2px solid var(--text-secondary);
-  border-radius: 50%;
-  color: var(--text-secondary);
+  background: none;
+  border: none;
   font-size: 18px;
-  font-weight: 700;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 4px;
   transition: all 0.2s ease;
-  z-index: 5;
+  opacity: 0.7;
 }
 
 .watchlist-btn-icon:hover {
-  background: var(--primary-blue);
-  border-color: var(--primary-blue);
-  color: white;
-  transform: scale(1.1);
+  transform: scale(1.2);
+  opacity: 1;
 }
 
 .watchlist-btn-icon.active {
-  background: var(--accent-cyan);
-  border-color: var(--accent-cyan);
-  color: var(--bg-dark);
+  opacity: 1;
 }
 
 .movie-info {

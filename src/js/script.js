@@ -189,10 +189,10 @@ function updateWatchlistIcons() {
     const movieId = parseInt(btn.dataset.movieId);
     if (isInWatchlist(movieId)) {
       btn.classList.add('active');
-      btn.innerHTML = '✓';
+      btn.innerHTML = '🔖';
     } else {
       btn.classList.remove('active');
-      btn.innerHTML = '+';
+      btn.innerHTML = '🏷️';
     }
   });
 }
@@ -213,11 +213,6 @@ function renderMovies(movieList) {
     card.innerHTML = `
       <span class="rank-badge">#${index + 1}</span>
       <span class="rating-badge">★ ${movie.rating}</span>
-      <button class="watchlist-btn-icon ${inWatchlist ? 'active' : ''}"
-              data-movie-id="${movie.id}"
-              title="${inWatchlist ? '워치리스트에서 제거' : '워치리스트에 추가'}">
-        ${inWatchlist ? '✓' : '+'}
-      </button>
       <img src="${movie.image}" alt="${movie.title}">
       <div class="movie-info">
         <div class="title">${movie.title}</div>
@@ -225,6 +220,11 @@ function renderMovies(movieList) {
         <div class="movie-stats">
           <span class="likes">좋아요 ${movie.likes}</span>
           <span class="star-rating">★ ${movie.rating}</span>
+          <button class="watchlist-btn-icon ${inWatchlist ? 'active' : ''}"
+                  data-movie-id="${movie.id}"
+                  title="${inWatchlist ? '워치리스트에서 제거' : '워치리스트에 추가'}">
+            ${inWatchlist ? '🔖' : '🏷️'}
+          </button>
         </div>
       </div>
     `;
