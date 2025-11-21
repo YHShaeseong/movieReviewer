@@ -154,6 +154,7 @@ function renderMovies(movieList) {
     const card = document.createElement('div');
     card.className = 'movie_item';
     card.dataset.movieId = movie.id;
+    card.style.cursor = 'pointer';
     card.innerHTML = `
       <span class="rank-badge">#${index + 1}</span>
       <span class="rating-badge">★ ${movie.rating}</span>
@@ -167,6 +168,8 @@ function renderMovies(movieList) {
         </div>
       </div>
     `;
+    // 영화 카드 클릭 시 상세 모달 열기
+    card.onclick = () => openMovieDetailModal(movie.id);
     fragment.appendChild(card);
   });
 
@@ -314,6 +317,7 @@ async function loadDailyRecommendations() {
     movieList.forEach(movie => {
       const card = document.createElement('div');
       card.className = 'daily-movie-card';
+      card.style.cursor = 'pointer';
       card.innerHTML = `
         <img src="${tmdbApi.getImageUrl(movie.poster_path, 'w342')}" alt="${movie.title}">
         <div class="daily-movie-info">
@@ -321,6 +325,8 @@ async function loadDailyRecommendations() {
           <div class="daily-movie-rating">★ ${movie.vote_average.toFixed(1)}</div>
         </div>
       `;
+      // 일일 추천 카드 클릭 시 상세 모달 열기
+      card.onclick = () => openMovieDetailModal(movie.id);
       fragment.appendChild(card);
     });
 
@@ -487,6 +493,201 @@ function openProfileModal() {
 
 function closeProfileModal() {
   document.getElementById('profileModal').style.display = 'none';
+}
+
+/* ============================================
+   영화 상세 모달
+   ============================================ */
+
+async function openMovieDetailModal(movieId) {
+  const modal = document.getElementById('movieDetailModal');
+  const content = document.getElementById('movieDetailContent');
+
+  // 로딩 표시
+  content.innerHTML = `
+    <div class="movie-detail-loading">
+      <div class="spinner"></div>
+      <p>영화 정보를 불러오는 중...</p>
+    </div>
+  `;
+  modal.style.display = 'flex';
+
+  try {
+    // 영화 전체 정보 가져오기 (상세, 출연진, 비디오, 비슷한 영화, 리뷰)
+    const movie = await tmdbApi.getCompleteMovieInfo(movieId);
+
+    // 예고편 찾기
+    const trailer = findBestTrailer(movie.videos || { results: [] });
+
+    // 상세 페이지 렌더링
+    renderMovieDetail(movie, trailer);
+  } catch (error) {
+    console.error('영화 상세 정보 로딩 실패:', error);
+    content.innerHTML = `
+      <div class="movie-detail-loading">
+        <p>영화 정보를 불러올 수 없습니다.</p>
+        <button class="btn-primary" onclick="closeMovieDetailModal()">닫기</button>
+      </div>
+    `;
+  }
+}
+
+function closeMovieDetailModal() {
+  document.getElementById('movieDetailModal').style.display = 'none';
+}
+
+function renderMovieDetail(movie, trailer) {
+  const content = document.getElementById('movieDetailContent');
+  const backdropUrl = movie.backdrop_path
+    ? tmdbApi.getImageUrl(movie.backdrop_path, 'w1280')
+    : '';
+  const posterUrl = movie.poster_path
+    ? tmdbApi.getImageUrl(movie.poster_path, 'w500')
+    : 'https://via.placeholder.com/500x750?text=No+Image';
+
+  // 평점 별 계산 (10점 만점 -> 5점 만점)
+  const starRating = Math.round(movie.vote_average / 2);
+  const stars = '★'.repeat(starRating) + '☆'.repeat(5 - starRating);
+
+  // 러닝타임 포맷
+  const runtime = movie.runtime
+    ? `${Math.floor(movie.runtime / 60)}시간 ${movie.runtime % 60}분`
+    : '정보 없음';
+
+  // 출연진 (상위 8명)
+  const cast = movie.credits?.cast?.slice(0, 8) || [];
+
+  // 리뷰 (상위 3개)
+  const reviews = movie.reviews?.results?.slice(0, 3) || [];
+
+  // 비슷한 영화 (상위 6개)
+  const similarMovies = movie.similar?.results?.slice(0, 6) || [];
+
+  content.innerHTML = `
+    <!-- 배경 이미지 -->
+    <div class="movie-detail-backdrop" style="background-image: ${backdropUrl ? `url(${backdropUrl})` : 'linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #1e293b 100%)'}"></div>
+
+    <!-- 메인 정보 -->
+    <div class="movie-detail-main">
+      <div class="movie-detail-poster">
+        <img src="${posterUrl}" alt="${movie.title}">
+      </div>
+      <div class="movie-detail-info">
+        <h1 class="movie-detail-title">${movie.title}</h1>
+        ${movie.original_title !== movie.title ? `<p class="movie-detail-original-title">${movie.original_title}</p>` : ''}
+
+        <div class="movie-detail-meta">
+          <span>📅 ${movie.release_date?.split('-')[0] || 'N/A'}</span>
+          <span>⏱️ ${runtime}</span>
+          ${movie.production_countries?.[0] ? `<span>🌍 ${movie.production_countries[0].name}</span>` : ''}
+        </div>
+
+        <div class="movie-detail-rating">
+          <span class="rating-score">${movie.vote_average.toFixed(1)}</span>
+          <div class="rating-details">
+            <span class="rating-stars">${stars}</span>
+            <span class="rating-count">${movie.vote_count.toLocaleString()}명 평가</span>
+          </div>
+        </div>
+
+        <div class="movie-detail-genres">
+          ${movie.genres?.map(g => `<span class="genre-tag">${g.name}</span>`).join('') || ''}
+        </div>
+
+        <div class="movie-detail-actions">
+          <button class="btn-trailer ${!trailer ? 'disabled' : ''}"
+                  onclick="${trailer ? `openTrailerModal('${trailer.key}')` : `alert('예고편이 없습니다.')`}">
+            ▶ 예고편 보기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 줄거리 -->
+    ${movie.overview ? `
+    <div class="movie-detail-section">
+      <h3>📖 줄거리</h3>
+      <p class="movie-detail-overview">${movie.overview}</p>
+    </div>
+    ` : ''}
+
+    <!-- 출연진 -->
+    ${cast.length > 0 ? `
+    <div class="movie-detail-section">
+      <h3>🎭 출연진</h3>
+      <div class="cast-list">
+        ${cast.map(actor => `
+          <div class="cast-item">
+            <img src="${actor.profile_path ? tmdbApi.getImageUrl(actor.profile_path, 'w185') : 'https://via.placeholder.com/80x80?text=No+Image'}"
+                 alt="${actor.name}"
+                 onerror="this.src='https://via.placeholder.com/80x80?text=No+Image'">
+            <div class="cast-name">${actor.name}</div>
+            <div class="cast-character">${actor.character || ''}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- 리뷰 -->
+    ${reviews.length > 0 ? `
+    <div class="movie-detail-section">
+      <h3>💬 리뷰</h3>
+      <div class="reviews-list">
+        ${reviews.map(review => {
+          const rating = review.author_details?.rating;
+          const date = review.created_at ? new Date(review.created_at).toLocaleDateString('ko-KR') : '';
+          const initial = review.author?.charAt(0).toUpperCase() || '?';
+          return `
+            <div class="review-item">
+              <div class="review-header">
+                <div class="review-author">
+                  <div class="review-avatar">${initial}</div>
+                  <div>
+                    <div class="review-author-name">${review.author}</div>
+                    <div class="review-date">${date}</div>
+                  </div>
+                </div>
+                ${rating ? `<span class="review-rating">★ ${rating.toFixed(1)}</span>` : ''}
+              </div>
+              <div class="review-content truncated">${review.content}</div>
+              <button class="review-toggle" onclick="toggleReview(this)">더보기</button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- 비슷한 영화 -->
+    ${similarMovies.length > 0 ? `
+    <div class="movie-detail-section">
+      <h3>🎬 비슷한 영화</h3>
+      <div class="similar-movies">
+        ${similarMovies.map(m => `
+          <div class="similar-movie-item" onclick="openMovieDetailModal(${m.id})">
+            <img src="${m.poster_path ? tmdbApi.getImageUrl(m.poster_path, 'w185') : 'https://via.placeholder.com/120x180?text=No+Image'}"
+                 alt="${m.title}"
+                 onerror="this.src='https://via.placeholder.com/120x180?text=No+Image'">
+            <div class="similar-movie-title">${m.title}</div>
+            <div class="similar-movie-rating">★ ${m.vote_average.toFixed(1)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : ''}
+  `;
+}
+
+function toggleReview(btn) {
+  const content = btn.previousElementSibling;
+  if (content.classList.contains('truncated')) {
+    content.classList.remove('truncated');
+    btn.textContent = '접기';
+  } else {
+    content.classList.add('truncated');
+    btn.textContent = '더보기';
+  }
 }
 
 /* ============================================
@@ -909,12 +1110,19 @@ function setupEventListeners() {
     };
   }
 
+  // 영화 상세 모달
+  const movieDetailModalClose = document.querySelector('#movieDetailModal .modal-close');
+  if (movieDetailModalClose) {
+    movieDetailModalClose.onclick = closeMovieDetailModal;
+  }
+
   // 모달 외부 클릭
   window.addEventListener('click', (e) => {
     const modals = {
       authModal: closeAuthModal,
       watchlistLoginModal: closeWatchlistLoginModal,
-      profileModal: closeProfileModal
+      profileModal: closeProfileModal,
+      movieDetailModal: closeMovieDetailModal
     };
 
     Object.entries(modals).forEach(([id, closeFn]) => {
