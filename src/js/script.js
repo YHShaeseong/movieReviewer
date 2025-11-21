@@ -143,6 +143,60 @@ function transformMovieData(movie) {
    렌더링 함수 (성능 최적화)
    ============================================ */
 
+// 워치리스트 관리
+function getWatchlist() {
+  const key = currentUser ? `watchlist_${currentUser.username}` : 'watchlist_guest';
+  return JSON.parse(localStorage.getItem(key)) || [];
+}
+
+function saveWatchlist(watchlist) {
+  const key = currentUser ? `watchlist_${currentUser.username}` : 'watchlist_guest';
+  localStorage.setItem(key, JSON.stringify(watchlist));
+}
+
+function isInWatchlist(movieId) {
+  return getWatchlist().some(m => m.id === movieId);
+}
+
+function toggleWatchlist(movie, event) {
+  event.stopPropagation(); // 카드 클릭 이벤트 전파 방지
+
+  const watchlist = getWatchlist();
+  const index = watchlist.findIndex(m => m.id === movie.id);
+
+  if (index > -1) {
+    watchlist.splice(index, 1);
+    alert(`"${movie.title}"이(가) 워치리스트에서 제거되었습니다.`);
+  } else {
+    watchlist.push({
+      id: movie.id,
+      title: movie.title,
+      image: movie.image,
+      rating: movie.rating,
+      year: movie.year,
+      addedAt: new Date().toISOString()
+    });
+    alert(`"${movie.title}"이(가) 워치리스트에 추가되었습니다.`);
+  }
+
+  saveWatchlist(watchlist);
+  // 아이콘 상태 업데이트
+  updateWatchlistIcons();
+}
+
+function updateWatchlistIcons() {
+  document.querySelectorAll('.watchlist-btn-icon').forEach(btn => {
+    const movieId = parseInt(btn.dataset.movieId);
+    if (isInWatchlist(movieId)) {
+      btn.classList.add('active');
+      btn.innerHTML = '✓';
+    } else {
+      btn.classList.remove('active');
+      btn.innerHTML = '+';
+    }
+  });
+}
+
 // 영화 목록 렌더링 (DocumentFragment 사용)
 function renderMovies(movieList) {
   const container = document.getElementById('movies');
@@ -151,6 +205,7 @@ function renderMovies(movieList) {
   const fragment = document.createDocumentFragment();
 
   movieList.forEach((movie, index) => {
+    const inWatchlist = isInWatchlist(movie.id);
     const card = document.createElement('div');
     card.className = 'movie_item';
     card.dataset.movieId = movie.id;
@@ -158,6 +213,11 @@ function renderMovies(movieList) {
     card.innerHTML = `
       <span class="rank-badge">#${index + 1}</span>
       <span class="rating-badge">★ ${movie.rating}</span>
+      <button class="watchlist-btn-icon ${inWatchlist ? 'active' : ''}"
+              data-movie-id="${movie.id}"
+              title="${inWatchlist ? '워치리스트에서 제거' : '워치리스트에 추가'}">
+        ${inWatchlist ? '✓' : '+'}
+      </button>
       <img src="${movie.image}" alt="${movie.title}">
       <div class="movie-info">
         <div class="title">${movie.title}</div>
@@ -170,6 +230,11 @@ function renderMovies(movieList) {
     `;
     // 영화 카드 클릭 시 상세 모달 열기
     card.onclick = () => openMovieDetailModal(movie.id);
+
+    // 워치리스트 버튼 클릭
+    const watchlistBtn = card.querySelector('.watchlist-btn-icon');
+    watchlistBtn.onclick = (e) => toggleWatchlist(movie, e);
+
     fragment.appendChild(card);
   });
 

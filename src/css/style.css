@@ -512,6 +512,41 @@ body {
   font-size: 14px;
 }
 
+/* 워치리스트 아이콘 버튼 */
+.watchlist-btn-icon {
+  position: absolute;
+  top: 12px;
+  right: 70px;
+  width: 32px;
+  height: 32px;
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--text-secondary);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.watchlist-btn-icon:hover {
+  background: var(--primary-blue);
+  border-color: var(--primary-blue);
+  color: white;
+  transform: scale(1.1);
+}
+
+.watchlist-btn-icon.active {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: var(--bg-dark);
+}
+
 .movie-info {
   padding: 16px;
   background: var(--bg-card);
