@@ -513,14 +513,20 @@ async function openMovieDetailModal(movieId) {
   modal.style.display = 'flex';
 
   try {
-    // 영화 전체 정보 가져오기 (상세, 출연진, 비디오, 비슷한 영화, 리뷰)
-    const movie = await tmdbApi.getCompleteMovieInfo(movieId);
+    // 영화 전체 정보와 스트리밍 정보 병렬 로드
+    const [movie, watchProviders] = await Promise.all([
+      tmdbApi.getCompleteMovieInfo(movieId),
+      tmdbApi.getWatchProviders(movieId)
+    ]);
 
     // 예고편 찾기
     const trailer = findBestTrailer(movie.videos || { results: [] });
 
+    // 한국 스트리밍 정보 추출
+    const krProviders = watchProviders.results?.KR || null;
+
     // 상세 페이지 렌더링
-    renderMovieDetail(movie, trailer);
+    renderMovieDetail(movie, trailer, krProviders);
   } catch (error) {
     console.error('영화 상세 정보 로딩 실패:', error);
     content.innerHTML = `
@@ -536,7 +542,21 @@ function closeMovieDetailModal() {
   document.getElementById('movieDetailModal').style.display = 'none';
 }
 
-function renderMovieDetail(movie, trailer) {
+// 스트리밍 서비스 URL 매핑
+const STREAMING_URLS = {
+  8: { name: 'Netflix', url: 'https://www.netflix.com/search?q=' },
+  337: { name: 'Disney+', url: 'https://www.disneyplus.com/search?q=' },
+  356: { name: 'wavve', url: 'https://www.wavve.com/search?searchWord=' },
+  97: { name: 'Watcha', url: 'https://watcha.com/search?query=' },
+  119: { name: 'Amazon Prime', url: 'https://www.primevideo.com/search?phrase=' },
+  350: { name: 'Apple TV+', url: 'https://tv.apple.com/search?term=' },
+  2: { name: 'Apple TV', url: 'https://tv.apple.com/search?term=' },
+  3: { name: 'Google Play', url: 'https://play.google.com/store/search?q=' },
+  192: { name: 'YouTube', url: 'https://www.youtube.com/results?search_query=' },
+  96: { name: 'Naver Store', url: 'https://serieson.naver.com/search?query=' }
+};
+
+function renderMovieDetail(movie, trailer, watchProviders = null) {
   const content = document.getElementById('movieDetailContent');
   const backdropUrl = movie.backdrop_path
     ? tmdbApi.getImageUrl(movie.backdrop_path, 'w1280')
@@ -627,6 +647,10 @@ function renderMovieDetail(movie, trailer) {
                   onclick="${trailer ? `openTrailerModal('${trailer.key}')` : `alert('예고편이 없습니다.')`}">
             ▶ 예고편 보기
           </button>
+          <button class="btn-watch ${!watchProviders ? 'disabled' : ''}"
+                  onclick="${watchProviders ? `openWatchProvidersModal(${movie.id}, '${encodeURIComponent(movie.title)}')` : `alert('스트리밍 정보가 없습니다.')`}">
+            🎬 보러가기
+          </button>
         </div>
       </div>
     </div>
@@ -708,6 +732,97 @@ function toggleReview(btn) {
     content.classList.add('truncated');
     btn.textContent = '더보기';
   }
+}
+
+// 스트리밍 서비스 선택 모달
+let currentWatchProviders = null;
+
+async function openWatchProvidersModal(movieId, encodedTitle) {
+  const title = decodeURIComponent(encodedTitle);
+
+  try {
+    const watchData = await tmdbApi.getWatchProviders(movieId);
+    const krProviders = watchData.results?.KR;
+
+    if (!krProviders) {
+      alert('한국에서 이용 가능한 스트리밍 서비스가 없습니다.');
+      return;
+    }
+
+    currentWatchProviders = { providers: krProviders, title, link: krProviders.link };
+
+    // 모든 제공자 합치기 (스트리밍, 대여, 구매)
+    const allProviders = [
+      ...(krProviders.flatrate || []).map(p => ({ ...p, type: '구독' })),
+      ...(krProviders.rent || []).map(p => ({ ...p, type: '대여' })),
+      ...(krProviders.buy || []).map(p => ({ ...p, type: '구매' }))
+    ];
+
+    // 중복 제거 (provider_id 기준)
+    const uniqueProviders = allProviders.filter((provider, index, self) =>
+      index === self.findIndex(p => p.provider_id === provider.provider_id)
+    );
+
+    if (uniqueProviders.length === 0) {
+      alert('이용 가능한 스트리밍 서비스가 없습니다.');
+      return;
+    }
+
+    // 모달 생성
+    let modal = document.getElementById('watchProvidersModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'watchProvidersModal';
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content watch-providers-modal">
+          <span class="modal-close" onclick="closeWatchProvidersModal()">&times;</span>
+          <h2>🎬 보러가기</h2>
+          <p class="watch-providers-subtitle">시청 가능한 서비스를 선택하세요</p>
+          <div id="watchProvidersList" class="watch-providers-list"></div>
+          <a id="tmdbWatchLink" href="#" target="_blank" class="tmdb-watch-link">
+            TMDB에서 더 많은 정보 보기 →
+          </a>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      modal.onclick = (e) => e.target === modal && closeWatchProvidersModal();
+    }
+
+    // 제공자 목록 렌더링
+    const listContainer = document.getElementById('watchProvidersList');
+    listContainer.innerHTML = uniqueProviders.map(provider => {
+      const streamingInfo = STREAMING_URLS[provider.provider_id];
+      const searchUrl = streamingInfo
+        ? streamingInfo.url + encodeURIComponent(title)
+        : krProviders.link;
+
+      return `
+        <a href="${searchUrl}" target="_blank" class="watch-provider-item">
+          <img src="${tmdbApi.getImageUrl(provider.logo_path, 'w92')}"
+               alt="${provider.provider_name}"
+               onerror="this.src='https://via.placeholder.com/45x45?text=?'">
+          <div class="watch-provider-info">
+            <span class="watch-provider-name">${provider.provider_name}</span>
+            <span class="watch-provider-type">${provider.type}</span>
+          </div>
+        </a>
+      `;
+    }).join('');
+
+    // TMDB 링크 설정
+    document.getElementById('tmdbWatchLink').href = krProviders.link || '#';
+
+    modal.style.display = 'flex';
+  } catch (error) {
+    console.error('스트리밍 정보 로딩 실패:', error);
+    alert('스트리밍 정보를 불러올 수 없습니다.');
+  }
+}
+
+function closeWatchProvidersModal() {
+  const modal = document.getElementById('watchProvidersModal');
+  if (modal) modal.style.display = 'none';
 }
 
 /* ============================================
