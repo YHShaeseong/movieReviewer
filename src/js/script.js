@@ -569,8 +569,28 @@ function renderMovieDetail(movie, trailer) {
 
     <!-- 메인 정보 -->
     <div class="movie-detail-main">
-      <div class="movie-detail-poster">
-        <img src="${posterUrl}" alt="${movie.title}">
+      <div class="movie-detail-poster-section">
+        <div class="movie-detail-poster">
+          <img src="${posterUrl}" alt="${movie.title}">
+        </div>
+        <!-- 포스터 아래 간단 정보 -->
+        <div class="movie-poster-info">
+          ${movie.tagline ? `<p class="movie-tagline">"${movie.tagline}"</p>` : ''}
+          <div class="movie-quick-stats">
+            <div class="quick-stat">
+              <span class="quick-stat-value">${movie.vote_average.toFixed(1)}</span>
+              <span class="quick-stat-label">평점</span>
+            </div>
+            <div class="quick-stat">
+              <span class="quick-stat-value">${movie.vote_count.toLocaleString()}</span>
+              <span class="quick-stat-label">평가수</span>
+            </div>
+            <div class="quick-stat">
+              <span class="quick-stat-value">${movie.runtime || '-'}</span>
+              <span class="quick-stat-label">분</span>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="movie-detail-info">
         <h1 class="movie-detail-title">${movie.title}</h1>
@@ -594,6 +614,14 @@ function renderMovieDetail(movie, trailer) {
           ${movie.genres?.map(g => `<span class="genre-tag">${g.name}</span>`).join('') || ''}
         </div>
 
+        <!-- 줄거리를 오른쪽 정보 영역에 배치 -->
+        ${movie.overview ? `
+        <div class="movie-inline-overview">
+          <h4>줄거리</h4>
+          <p>${movie.overview}</p>
+        </div>
+        ` : ''}
+
         <div class="movie-detail-actions">
           <button class="btn-trailer ${!trailer ? 'disabled' : ''}"
                   onclick="${trailer ? `openTrailerModal('${trailer.key}')` : `alert('예고편이 없습니다.')`}">
@@ -602,14 +630,6 @@ function renderMovieDetail(movie, trailer) {
         </div>
       </div>
     </div>
-
-    <!-- 줄거리 -->
-    ${movie.overview ? `
-    <div class="movie-detail-section">
-      <h3>📖 줄거리</h3>
-      <p class="movie-detail-overview">${movie.overview}</p>
-    </div>
-    ` : ''}
 
     <!-- 출연진 -->
     ${cast.length > 0 ? `
@@ -629,10 +649,10 @@ function renderMovieDetail(movie, trailer) {
     </div>
     ` : ''}
 
-    <!-- 리뷰 -->
-    ${reviews.length > 0 ? `
+    <!-- 리뷰 (서평) -->
     <div class="movie-detail-section">
-      <h3>💬 리뷰</h3>
+      <h3>💬 평점 및 리뷰</h3>
+      ${reviews.length > 0 ? `
       <div class="reviews-list">
         ${reviews.map(review => {
           const rating = review.author_details?.rating;
@@ -656,8 +676,8 @@ function renderMovieDetail(movie, trailer) {
           `;
         }).join('')}
       </div>
+      ` : `<p class="no-reviews">아직 등록된 리뷰가 없습니다.</p>`}
     </div>
-    ` : ''}
 
     <!-- 비슷한 영화 -->
     ${similarMovies.length > 0 ? `

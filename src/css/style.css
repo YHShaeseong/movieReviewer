@@ -1977,15 +1977,91 @@ body {
   z-index: 1;
 }
 
-.movie-detail-poster {
+.movie-detail-poster-section {
   flex-shrink: 0;
   width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.movie-detail-poster {
+  width: 100%;
 }
 
 .movie-detail-poster img {
   width: 100%;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* 포스터 아래 정보 */
+.movie-poster-info {
+  background: var(--bg-dark);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.movie-tagline {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--accent-cyan);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.movie-quick-stats {
+  display: flex;
+  justify-content: space-around;
+}
+
+.quick-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.quick-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.quick-stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* 인라인 줄거리 */
+.movie-inline-overview {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg-dark);
+  border-radius: 10px;
+  border-left: 3px solid var(--accent-cyan);
+}
+
+.movie-inline-overview h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.movie-inline-overview p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* 리뷰 없음 메시지 */
+.no-reviews {
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
 }
 
 .movie-detail-info {
@@ -2319,8 +2395,24 @@ body {
     padding: 0 20px;
   }
 
-  .movie-detail-poster {
+  .movie-detail-poster-section {
     width: 150px;
+  }
+
+  .movie-poster-info {
+    padding: 12px;
+  }
+
+  .movie-tagline {
+    font-size: 12px;
+  }
+
+  .quick-stat-value {
+    font-size: 16px;
+  }
+
+  .movie-inline-overview {
+    text-align: left;
   }
 
   .movie-detail-title {
