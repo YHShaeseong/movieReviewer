@@ -629,10 +629,59 @@ function initializeMainContent() {
 function setupMainPageEvents() {
   const searchInput = document.getElementById('searchInput');
   if (searchInput) {
-    searchInput.oninput = (e) => {
-      const keyword = e.target.value.toLowerCase();
-      const filtered = movies.filter(m => m.title.toLowerCase().includes(keyword));
-      renderMovies(filtered.length > 0 ? filtered : movies);
+    let searchTimeout;
+    searchInput.oninput = async (e) => {
+      clearTimeout(searchTimeout);
+      const keyword = e.target.value.trim();
+
+      // 검색어가 비어있으면 원래 목록 표시
+      if (keyword.length === 0) {
+        renderMovies(movies.slice(0, isShowingAll ? movies.length : CONFIG.INITIAL_MOVIES_COUNT));
+        return;
+      }
+
+      // 2글자 미만이면 로컬 필터링만
+      if (keyword.length < 2) {
+        const filtered = movies.filter(m => m.title.toLowerCase().includes(keyword.toLowerCase()));
+        renderMovies(filtered.length > 0 ? filtered : movies);
+        return;
+      }
+
+      // 2글자 이상이면 TMDB API 검색 (한국어+영어 병렬)
+      searchTimeout = setTimeout(async () => {
+        try {
+          const [koData, enData] = await Promise.all([
+            tmdbApi.searchMovies(keyword, 1, { language: 'ko-KR' }),
+            tmdbApi.searchMovies(keyword, 1, { language: 'en-US' })
+          ]);
+
+          // 중복 제거 (ID 기준)
+          const allMovies = [...koData.results];
+          enData.results.forEach(movie => {
+            if (!allMovies.find(m => m.id === movie.id)) {
+              allMovies.push(movie);
+            }
+          });
+
+          if (allMovies.length === 0) {
+            // 검색 결과 없음 표시
+            const container = document.getElementById('movies');
+            if (container) {
+              container.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
+            }
+            return;
+          }
+
+          // 검색 결과를 기존 형식으로 변환하여 렌더링
+          const searchResults = allMovies.slice(0, 20).map(transformMovieData);
+          renderMovies(searchResults);
+        } catch (error) {
+          console.error('영화 검색 실패:', error);
+          // 오류 시 로컬 필터링으로 폴백
+          const filtered = movies.filter(m => m.title.toLowerCase().includes(keyword.toLowerCase()));
+          renderMovies(filtered.length > 0 ? filtered : movies);
+        }
+      }, 300);
     };
   }
 }

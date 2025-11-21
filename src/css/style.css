@@ -431,6 +431,18 @@ body {
   gap: 24px;
 }
 
+/* 검색 결과 없음 스타일 */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 18px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: 1px dashed var(--border-color);
+}
+
 @media (max-width: 1400px) {
   .movie-grid {
     grid-template-columns: repeat(4, 1fr);
