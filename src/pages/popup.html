@@ -207,6 +207,9 @@
   </section>
   <!-- ==================== 취향 확인 팝업 섹션 끝 ==================== -->
 
-  <script src="../js/popup.js"></script>
+  <!-- TMDB API 모듈 먼저 로드 (Load TMDB API module first) -->
+  <script src="../js/tmdbApi.js"></script>
+  <!-- 팝업 스크립트 (ES6 모듈) - Popup script (ES6 module) -->
+  <script type="module" src="../js/popup.js"></script>
 </body>
 </html>
