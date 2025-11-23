@@ -560,6 +560,18 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
       return;
     }
 
+    // 플랫폼이 1개만 있으면 바로 해당 플랫폼으로 이동 (If only one platform, go directly)
+    if (uniqueProviders.length === 1) {
+      const provider = uniqueProviders[0];
+      const streamingInfo = STREAMING_URLS[provider.provider_id];
+      const searchUrl = streamingInfo
+        ? streamingInfo.url + encodeURIComponent(title)
+        : krProviders.link;
+
+      window.open(searchUrl, '_blank');
+      return;
+    }
+
     // 모달 생성 (Create modal)
     let modal = document.getElementById('watchProvidersModal');
     if (!modal) {
