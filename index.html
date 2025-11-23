@@ -15,7 +15,12 @@
   <!-- 헤더: 로고, 검색, 메뉴 -->
   <header class="header">
     <div class="logo">Pictos</div>
-    <input type="text" id="searchInput" placeholder="영화 제목, 배우, 감독을 검색하세요...">
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="영화 제목, 배우, 감독을 검색하세요...">
+      <div id="searchResults" class="search-results-dropdown" style="display: none;">
+        <!-- 검색 결과가 여기에 동적으로 표시됩니다 -->
+      </div>
+    </div>
     <nav>
       <a href="#top100">TOP100 영화</a>
       <a href="#genres">추천 장르</a>

@@ -142,26 +142,30 @@ function initializeMainContent() {
  */
 function setupMainPageEvents() {
   const searchInput = document.getElementById('searchInput');
-  if (searchInput) {
+  const searchResultsDropdown = document.getElementById('searchResults');
+
+  if (searchInput && searchResultsDropdown) {
     let searchTimeout;
+
+    // 검색 입력 이벤트 (Search input event)
     searchInput.oninput = async (e) => {
       clearTimeout(searchTimeout);
       const keyword = e.target.value.trim();
 
-      // 검색어가 비어있으면 원래 목록 표시 (Show original list if empty)
+      // 검색어가 비어있으면 드롭다운 숨김 (Hide dropdown if empty)
       if (keyword.length === 0) {
-        renderMovies(movies.slice(0, isShowingAll ? movies.length : CONFIG.INITIAL_MOVIES_COUNT));
+        searchResultsDropdown.style.display = 'none';
+        searchResultsDropdown.innerHTML = '';
         return;
       }
 
-      // 2글자 미만이면 로컬 필터링만 (Local filtering for < 2 chars)
-      if (keyword.length < 2) {
-        const filtered = movies.filter(m => m.title.toLowerCase().includes(keyword.toLowerCase()));
-        renderMovies(filtered.length > 0 ? filtered : movies);
+      // 1글자 이상이면 검색 시작 (Start search for >= 1 char)
+      if (keyword.length < 1) {
+        searchResultsDropdown.style.display = 'none';
         return;
       }
 
-      // 2글자 이상이면 TMDB API 검색 (TMDB API search for >= 2 chars)
+      // TMDB API 검색 (TMDB API search)
       searchTimeout = setTimeout(async () => {
         try {
           const [koData, enData] = await Promise.all([
@@ -177,24 +181,77 @@ function setupMainPageEvents() {
             }
           });
 
-          if (allMovies.length === 0) {
-            const container = document.getElementById('movies');
-            if (container) {
-              container.innerHTML = '<div class="no-results">검색 결과가 없습니다.</div>';
-            }
-            return;
-          }
-
-          const searchResults = allMovies.slice(0, 20).map(transformMovieData);
-          renderMovies(searchResults);
+          // 드롭다운에 검색 결과 표시 (Display search results in dropdown)
+          renderSearchDropdown(allMovies.slice(0, 8), searchResultsDropdown);
         } catch (error) {
           console.error('영화 검색 실패:', error);
-          const filtered = movies.filter(m => m.title.toLowerCase().includes(keyword.toLowerCase()));
-          renderMovies(filtered.length > 0 ? filtered : movies);
+          searchResultsDropdown.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
+          searchResultsDropdown.style.display = 'block';
         }
       }, 300);
     };
+
+    // 검색창 외부 클릭 시 드롭다운 닫기 (Close dropdown on outside click)
+    document.addEventListener('click', (e) => {
+      if (!searchInput.contains(e.target) && !searchResultsDropdown.contains(e.target)) {
+        searchResultsDropdown.style.display = 'none';
+      }
+    });
+
+    // 검색창 포커스 시 결과가 있으면 다시 표시 (Show results on focus if exists)
+    searchInput.onfocus = () => {
+      if (searchResultsDropdown.innerHTML && searchInput.value.trim()) {
+        searchResultsDropdown.style.display = 'block';
+      }
+    };
   }
+}
+
+/**
+ * 검색 결과 드롭다운 렌더링
+ * Render search results dropdown
+ * @param {Array} movies - 영화 목록
+ * @param {HTMLElement} container - 드롭다운 컨테이너
+ */
+function renderSearchDropdown(movies, container) {
+  if (!movies || movies.length === 0) {
+    container.innerHTML = '<div class="search-no-results">검색 결과가 없습니다.</div>';
+    container.style.display = 'block';
+    return;
+  }
+
+  container.innerHTML = movies.map(movie => {
+    const posterUrl = movie.poster_path
+      ? window.tmdbApi.getImageUrl(movie.poster_path, 'w185')
+      : 'https://via.placeholder.com/50x75?text=No+Image';
+    const year = movie.release_date?.split('-')[0] || 'N/A';
+    const rating = movie.vote_average?.toFixed(1) || 'N/A';
+
+    return `
+      <div class="search-result-item" data-movie-id="${movie.id}">
+        <img src="${posterUrl}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/50x75?text=No+Image'">
+        <div class="search-result-info">
+          <div class="search-result-title">${movie.title}</div>
+          <div class="search-result-meta">
+            <span>${year}</span>
+            <span class="search-result-rating">★ ${rating}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // 각 검색 결과 항목에 클릭 이벤트 추가 (Add click event to each result item)
+  container.querySelectorAll('.search-result-item').forEach(item => {
+    item.onclick = () => {
+      const movieId = parseInt(item.dataset.movieId);
+      container.style.display = 'none';
+      document.getElementById('searchInput').value = '';
+      openMovieDetailModal(movieId);
+    };
+  });
+
+  container.style.display = 'block';
 }
 
 /* ============================================

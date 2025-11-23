@@ -62,8 +62,14 @@ body {
   letter-spacing: -0.5px;
 }
 
-#searchInput {
+/* 검색 컨테이너 (Search Container) */
+.search-container {
+  position: relative;
   width: 400px;
+}
+
+#searchInput {
+  width: 100%;
   padding: 12px 20px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -80,6 +86,99 @@ body {
 
 #searchInput::placeholder {
   color: var(--text-muted);
+}
+
+/* 검색 결과 드롭다운 (Search Results Dropdown) */
+.search-results-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.search-result-item img {
+  width: 50px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.search-result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-result-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.search-result-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-result-rating {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.search-no-results {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* 검색 결과 드롭다운 스크롤바 (Scrollbar) */
+.search-results-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+  border-radius: 0 12px 12px 0;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .header nav {
