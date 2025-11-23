@@ -423,10 +423,13 @@ async function getRecommendedMovies() {
       }
     });
 
+    // 유명하고 평가가 좋은 영화만 추천 (Only recommend popular and well-rated movies)
     const data = await window.tmdbApi.discoverMovies({
       with_genres: userProfile.genres.join(','),
       without_genres: withoutGenres.length > 0 ? withoutGenres.join(',') : undefined,
       sort_by: userProfile.sortBy,
+      'vote_count.gte': 1000,      // 최소 1000개 이상의 평가
+      'vote_average.gte': 6.5,     // 최소 평점 6.5 이상
       page: 1
     });
 
