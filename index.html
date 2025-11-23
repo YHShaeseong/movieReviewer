@@ -23,7 +23,6 @@
     </div>
     <nav>
       <a href="#top100">TOP100 영화</a>
-      <a href="#genres">추천 장르</a>
       <button id="watchlistBtn" class="watchlist-btn">Watchlist</button>
       <button class="login-btn">로그인</button>
       <span id="userInfo" class="user-info" style="display: none;">
@@ -179,6 +178,12 @@
   <section class="top100" id="top100">
     <div class="section-header">
       <h2>지금 가장 인기있는 영화</h2>
+      <select id="sortSelect" class="sort-select">
+        <option value="popularity.desc">인기도 내림차순</option>
+        <option value="popularity.asc">인기도 오름차순</option>
+        <option value="vote_average.desc">평점 내림차순</option>
+        <option value="vote_average.asc">평점 오름차순</option>
+      </select>
     </div>
     <p>실시간으로 가장 많은 사람들이 찾는 영화들</p>
     <div id="movies" class="movie-grid"></div>
@@ -189,32 +194,11 @@
     </div>
   </section>
 
-  <!-- 푸터: 로고, 링크, SNS -->
+  <!-- 푸터: 로고 -->
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-logo">Pictos</div>
       <p>개인 취향에 맞는 영화를 추천받고, 다양한 리뷰와 평점을 확인할 수 있는 최고의 영화 추천 서비스입니다.</p>
-      <div class="footer-links">
-        <div class="link-group">
-          <h3>빠른 링크</h3>
-          <a href="#">TOP100 영화</a>
-          <a href="#">장르별 영화</a>
-          <a href="#">추천 리뷰</a>
-          <a href="#">신작 영화</a>
-        </div>
-        <div class="link-group">
-          <h3>고객센터</h3>
-          <a href="#">자주 묻는 질문</a>
-          <a href="#">문의하기</a>
-          <a href="#">이용약관</a>
-          <a href="#">개인정보처리방침</a>
-        </div>
-      </div>
-      <div class="footer-social">
-        <span>Facebook</span>
-        <span>Twitter</span>
-        <span>Instagram</span>
-      </div>
       <p class="copyright">© 2024 Pictos. All rights reserved.</p>
     </div>
   </footer>

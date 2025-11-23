@@ -46,6 +46,9 @@ let movies = [];
 // 전체 보기 여부 (Show all flag)
 let isShowingAll = false;
 
+// 현재 정렬 기준 (Current sort option)
+let currentSortBy = 'popularity.desc';
+
 /* ============================================
    전역 함수 노출 (Expose Global Functions)
    모달에서 HTML onclick으로 호출하기 위해 window 객체에 추가
@@ -73,20 +76,30 @@ window.removeFromWatchlistModal = removeFromWatchlistModal;
    ============================================ */
 
 /**
- * 인기 영화 100개 가져오기
- * Fetch top 100 popular movies
+ * 영화 100개 가져오기 (정렬 기준에 따라)
+ * Fetch top 100 movies based on sort criteria
  */
-async function fetchMovies() {
+async function fetchMovies(sortBy = 'popularity.desc') {
   try {
+    currentSortBy = sortBy;
+
+    // 평점 정렬일 경우 vote_count 필터 추가
+    const filters = {
+      sort_by: sortBy,
+      'vote_count.gte': sortBy.includes('vote_average') ? 1000 : 100
+    };
+
     const pagePromises = Array.from(
       { length: CONFIG.TOTAL_PAGES },
-      (_, i) => window.tmdbApi.getPopularMovies(i + 1)
+      (_, i) => window.tmdbApi.discoverMovies({ ...filters, page: i + 1 })
     );
 
     const results = await Promise.all(pagePromises);
     movies = results.flatMap(data => data.results).map(transformMovieData);
 
-    renderMovies(movies.slice(0, CONFIG.INITIAL_MOVIES_COUNT));
+    // 전체 보기 상태에 따라 렌더링
+    const moviesToShow = isShowingAll ? movies : movies.slice(0, CONFIG.INITIAL_MOVIES_COUNT);
+    renderMovies(moviesToShow);
 
     const viewMoreBtn = document.getElementById('viewMoreBtn');
     if (viewMoreBtn && !isShowingAll) {
@@ -279,6 +292,15 @@ function setupEventListeners() {
       isShowingAll = true;
       renderMovies(movies);
       viewMoreBtn.style.display = 'none';
+    };
+  }
+
+  // 정렬 드롭다운 (Sort dropdown)
+  const sortSelect = document.getElementById('sortSelect');
+  if (sortSelect) {
+    sortSelect.onchange = (e) => {
+      isShowingAll = false;
+      fetchMovies(e.target.value);
     };
   }
 

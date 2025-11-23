@@ -124,7 +124,7 @@ export const STREAMING_URLS = {
   531: { name: 'Paramount+', url: 'https://www.paramountplus.com/search?q=' },
   350: { name: 'Apple TV+', url: 'https://tv.apple.com/kr/search?term=' },
   2: { name: 'Apple TV', url: 'https://tv.apple.com/kr/search?term=' },
-  3: { name: 'Google Play 무비', url: 'https://play.google.com/store/search?q=' },
   68: { name: 'Microsoft Store', url: 'https://www.microsoft.com/ko-kr/search?q=' },
   96: { name: 'Naver Store', url: 'https://series.naver.com/search/search.series?query=' }
+  // 3: Google Play 무비 제거됨 (removed)
 };

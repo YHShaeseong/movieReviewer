@@ -353,14 +353,8 @@ function renderMovieDetail(movie, trailer, watchProviders = null) {
     ? window.tmdbApi.getImageUrl(movie.poster_path, 'w500')
     : 'https://via.placeholder.com/500x750?text=No+Image';
 
-  // 평점 별 계산 (Calculate star rating)
-  const starRating = Math.round(movie.vote_average / 2);
-  const stars = '★'.repeat(starRating) + '☆'.repeat(5 - starRating);
-
-  // 러닝타임 포맷 (Format runtime)
-  const runtime = movie.runtime
-    ? `${Math.floor(movie.runtime / 60)}시간 ${movie.runtime % 60}분`
-    : '정보 없음';
+  // 평점 별 계산 제거됨 (Star rating calculation removed)
+  // 러닝타임 포맷 제거됨 (Runtime format removed)
 
   // 출연진, 리뷰, 비슷한 영화 (Cast, reviews, similar movies)
   const cast = movie.credits?.cast?.slice(0, 8) || [];
@@ -379,20 +373,6 @@ function renderMovieDetail(movie, trailer, watchProviders = null) {
         </div>
         <div class="movie-poster-info">
           ${movie.tagline ? `<p class="movie-tagline">"${movie.tagline}"</p>` : ''}
-          <div class="movie-quick-stats">
-            <div class="quick-stat">
-              <span class="quick-stat-value">${movie.vote_average.toFixed(1)}</span>
-              <span class="quick-stat-label">평점</span>
-            </div>
-            <div class="quick-stat">
-              <span class="quick-stat-value">${movie.vote_count.toLocaleString()}</span>
-              <span class="quick-stat-label">평가수</span>
-            </div>
-            <div class="quick-stat">
-              <span class="quick-stat-value">${movie.runtime || '-'}</span>
-              <span class="quick-stat-label">분</span>
-            </div>
-          </div>
         </div>
       </div>
       <div class="movie-detail-info">
@@ -401,16 +381,7 @@ function renderMovieDetail(movie, trailer, watchProviders = null) {
 
         <div class="movie-detail-meta">
           <span>📅 ${movie.release_date?.split('-')[0] || 'N/A'}</span>
-          <span>⏱️ ${runtime}</span>
           ${movie.production_countries?.[0] ? `<span>🌍 ${movie.production_countries[0].name}</span>` : ''}
-        </div>
-
-        <div class="movie-detail-rating">
-          <span class="rating-score">${movie.vote_average.toFixed(1)}</span>
-          <div class="rating-details">
-            <span class="rating-stars">${stars}</span>
-            <span class="rating-count">${movie.vote_count.toLocaleString()}명 평가</span>
-          </div>
         </div>
 
         <div class="movie-detail-genres">
@@ -584,9 +555,6 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
           <h2>🎬 보러가기</h2>
           <p class="watch-providers-subtitle">시청 가능한 서비스를 선택하세요</p>
           <div id="watchProvidersList" class="watch-providers-list"></div>
-          <a id="tmdbWatchLink" href="#" target="_blank" class="tmdb-watch-link">
-            TMDB에서 더 많은 정보 보기 →
-          </a>
         </div>
       `;
       document.body.appendChild(modal);

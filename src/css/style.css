@@ -467,6 +467,7 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  gap: 20px;
 }
 
 .section-header h2 {
@@ -497,6 +498,37 @@ body {
   display: flex;
   justify-content: center;
   margin-top: 50px;
+}
+
+/* 정렬 드롭다운 (Sort Dropdown) */
+.sort-select {
+  padding: 12px 20px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  min-width: 180px;
+}
+
+.sort-select:hover {
+  border-color: var(--primary-blue);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.sort-select:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.sort-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 10px;
 }
 
 .view-more-btn {
