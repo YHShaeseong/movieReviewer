@@ -30,73 +30,220 @@
    프로필 모달 스타일
    ============================================ */
 .profile-modal-content {
-  max-width: 600px;
+  max-width: 700px;
+  padding: 0;
+  overflow: hidden;
 }
 
-.profile-info {
+/* 프로필 커버 영역 */
+.profile-cover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #3b82f6 100%);
+  padding: 40px 40px 60px 40px;
+  position: relative;
+}
+
+.profile-header-info {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 24px;
-  margin-bottom: 30px;
+}
+
+.profile-avatar-large {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.profile-user-info h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.profile-join-date {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+/* 프로필 컨텐츠 영역 */
+.profile-content {
+  padding: 40px;
+  background: var(--bg-card);
 }
 
 .profile-section {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 20px;
+  margin-bottom: 40px;
 }
 
-.profile-section h3 {
-  font-size: 18px;
+.profile-section:last-child {
+  margin-bottom: 0;
+}
+
+.profile-section-title {
+  font-size: 20px;
   font-weight: 600;
-  color: var(--primary-light);
-  margin-bottom: 16px;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+/* 장르 태그 */
+.profile-genre-tags {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tag {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--text-primary);
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
-.profile-section h3::before {
-  content: "•";
-  color: var(--accent-cyan);
-  font-size: 24px;
-}
-
-.profile-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  min-height: 40px;
-}
-
-.profile-tag {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  color: var(--text-primary);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.3s ease;
-}
-
-.profile-tag:hover {
+.tag:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.profile-tag::before {
-  content: "✓";
-  color: var(--accent-cyan);
-  font-weight: bold;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  border-color: var(--primary-blue);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25));
 }
 
 .profile-empty {
   color: var(--text-muted);
   font-style: italic;
   font-size: 14px;
+}
+
+/* 평가한 영화 그리드 */
+.profile-movie-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.profile-movie-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-color);
+}
+
+.profile-movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  border-color: var(--primary-blue);
+}
+
+.profile-movie-poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-movie-info {
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.profile-movie-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-movie-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.profile-movie-rating::before {
+  content: "★";
+  font-size: 14px;
+}
+
+/* 프로필 수정 버튼 */
+.profile-edit-btn {
+  margin: 0 40px 40px 40px;
+  width: calc(100% - 80px);
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.profile-edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.5);
+}
+
+.profile-edit-btn:active {
+  transform: translateY(0);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .profile-movie-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .profile-cover {
+    padding: 30px 20px 40px 20px;
+  }
+
+  .profile-content {
+    padding: 30px 20px;
+  }
+
+  .profile-edit-btn {
+    margin: 0 20px 20px 20px;
+    width: calc(100% - 40px);
+  }
+
+  .profile-avatar-large {
+    width: 80px;
+    height: 80px;
+    font-size: 40px;
+  }
+
+  .profile-user-info h2 {
+    font-size: 24px;
+  }
 }

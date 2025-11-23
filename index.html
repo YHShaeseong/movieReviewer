@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pictos</title>
   <link rel="stylesheet" href="src/css/style.css">
-  <link rel="stylesheet" href="src/css/profile-styles.css">
+  <link rel="stylesheet" href="src/css/profile-styles.css?v=2">
 </head>
 <body>
   <!-- ==================== 취향 확인 팝업 (iframe) ==================== -->
@@ -76,68 +76,33 @@
   <div id="profileModal" class="modal" style="display: none;">
     <div class="modal-content profile-modal-content">
       <span class="modal-close">&times;</span>
-      <h2>내 프로필</h2>
-      <div class="profile-info">
-        <!-- 사용자 기본 정보 -->
-        <div class="profile-header-section">
-          <div class="profile-avatar">👤</div>
-          <div class="profile-user-details">
-            <h3 id="profileUsername">사용자</h3>
-            <p id="profileJoinDate" class="profile-meta">가입일: -</p>
+
+      <!-- 프로필 커버 & 헤더 -->
+      <div class="profile-cover">
+        <div class="profile-header-info">
+          <div class="profile-avatar-large">👤</div>
+          <div class="profile-user-info">
+            <h2 id="profileUsername">사용자</h2>
+            <p id="profileJoinDate" class="profile-join-date">가입일: -</p>
           </div>
-        </div>
-
-        <div class="profile-divider"></div>
-
-        <!-- 취향 통계 -->
-        <div class="profile-stats">
-          <div class="stat-item">
-            <span class="stat-number" id="profileGenreCount">0</span>
-            <span class="stat-label">선호 장르</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number" id="profileRatingCount">0</span>
-            <span class="stat-label">평가한 영화</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number" id="profileAvgRating">-</span>
-            <span class="stat-label">평균 별점</span>
-          </div>
-        </div>
-
-        <div class="profile-divider"></div>
-
-        <!-- 선호 장르 -->
-        <div class="profile-section">
-          <h3>🎬 선호하는 장르</h3>
-          <div id="profileGenres" class="profile-tags"></div>
-        </div>
-
-        <!-- 선호 무드 -->
-        <div class="profile-section">
-          <h3>🎭 선호하는 무드</h3>
-          <div id="profileMood" class="profile-tags"></div>
-        </div>
-
-        <!-- 탐색 스타일 -->
-        <div class="profile-section">
-          <h3>🔍 영화 선택 기준</h3>
-          <div id="profileExploration" class="profile-tags"></div>
-        </div>
-
-        <!-- 피하고 싶은 장르 -->
-        <div class="profile-section">
-          <h3>🚫 피하고 싶은 장르</h3>
-          <div id="profileDislikes" class="profile-tags"></div>
-        </div>
-
-        <!-- 평가한 영화 목록 -->
-        <div class="profile-section">
-          <h3>⭐ 최근 평가한 영화</h3>
-          <div id="profileRatedMovies" class="profile-rated-movies"></div>
         </div>
       </div>
-      <button id="editProfileBtn" class="btn-primary">프로필 수정</button>
+
+      <div class="profile-content">
+        <!-- 선호 장르 -->
+        <div class="profile-section">
+          <h3 class="profile-section-title">내가 좋아하는 장르</h3>
+          <div id="profileGenres" class="profile-genre-tags"></div>
+        </div>
+
+        <!-- 최근 평가한 영화 -->
+        <div class="profile-section">
+          <h3 class="profile-section-title">최근 평가한 영화</h3>
+          <div id="profileRatedMovies" class="profile-movie-grid"></div>
+        </div>
+      </div>
+
+      <button id="editProfileBtn" class="btn-primary profile-edit-btn">프로필 수정</button>
     </div>
   </div>
 

@@ -189,22 +189,25 @@ function displayProfileData(profile) {
     ? profile.dislikes.map(d => `<span class="tag">${getKoreanName('dislike', d)}</span>`).join('')
     : '<span class="profile-empty">피하고 싶은 장르 정보가 없습니다.</span>';
 
-  // 평가한 영화 (Rated movies)
+  // 평가한 영화 (Rated movies) - 최대 8개, 4x2 그리드
   if (containers.ratedMovies) {
+    const ratings = profile.ratings || [];
     if (ratings.length > 0) {
-      const recentRatings = ratings.slice(-5).reverse();
+      const recentRatings = ratings.slice(-8).reverse();
       containers.ratedMovies.innerHTML = recentRatings.map(r => `
-        <div class="rated-movie-item">
-          <img class="rated-movie-poster" src="https://image.tmdb.org/t/p/w92${r.poster_path || ''}"
-               alt="${r.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 60%22><rect fill=%22%23333%22 width=%2240%22 height=%2260%22/></svg>'">
-          <div class="rated-movie-info">
-            <div class="rated-movie-title">${r.title}</div>
-            <div class="rated-movie-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+        <div class="profile-movie-card" onclick="window.openMovieDetailModal(${r.movieId || 0})">
+          <img class="profile-movie-poster"
+               src="https://image.tmdb.org/t/p/w342${r.poster_path || ''}"
+               alt="${r.title}"
+               onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
+          <div class="profile-movie-info">
+            <div class="profile-movie-title">${r.title}</div>
+            <div class="profile-movie-rating">${r.rating.toFixed(1)}</div>
           </div>
         </div>
       `).join('');
     } else {
-      containers.ratedMovies.innerHTML = '<span class="profile-empty">평가한 영화가 없습니다.</span>';
+      containers.ratedMovies.innerHTML = '<span class="profile-empty">아직 평가한 영화가 없습니다.</span>';
     }
   }
 }
@@ -214,31 +217,24 @@ function displayProfileData(profile) {
  */
 function displayEmptyProfile() {
   const currentUser = getCurrentUser();
-  const messages = {
-    profileGenres: '선호 장르 정보가 없습니다.',
-    profileMood: '무드 정보가 없습니다.',
-    profileDislikes: '피하고 싶은 장르 정보가 없습니다.',
-    profileExploration: '탐색 기준 정보가 없습니다.',
-    profileRatedMovies: '평가한 영화가 없습니다.'
-  };
-
-  Object.entries(messages).forEach(([id, msg]) => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = `<span class="profile-empty">${msg}</span>`;
-  });
-
-  // 통계 초기화 (Reset statistics)
-  const stats = { profileGenreCount: '0', profileRatingCount: '0', profileAvgRating: '-' };
-  Object.entries(stats).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  });
 
   // 사용자 정보 (User info)
   const usernameEl = document.getElementById('profileUsername');
   const joinDateEl = document.getElementById('profileJoinDate');
   if (usernameEl) usernameEl.textContent = currentUser?.username || '게스트';
   if (joinDateEl) joinDateEl.textContent = '가입일: -';
+
+  // 선호 장르 (Favorite genres)
+  const genresEl = document.getElementById('profileGenres');
+  if (genresEl) {
+    genresEl.innerHTML = '<span class="profile-empty">선호 장르 정보가 없습니다.</span>';
+  }
+
+  // 평가한 영화 (Rated movies)
+  const ratedMoviesEl = document.getElementById('profileRatedMovies');
+  if (ratedMoviesEl) {
+    ratedMoviesEl.innerHTML = '<span class="profile-empty">아직 평가한 영화가 없습니다.</span>';
+  }
 }
 
 /* ============================================
