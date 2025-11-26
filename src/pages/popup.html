@@ -22,143 +22,195 @@
       </div>
 
       <div class="popup-content">
-        <!-- 1단계: 5가지 질문 -->
+        <!-- 1단계: 5가지 질문 (개별 페이지) -->
         <div class="survey-step" id="firstPopup">
-          <div class="step-indicator">
-            <span class="step-number active">1</span>
-            <span class="step-divider"></span>
-            <span class="step-number">2</span>
-          </div>
-
-          <!-- Q1: 인생 영화 -->
-          <div class="question-block">
-            <label class="question-label">
-              <span class="question-number">Q1.</span>
-              당신의 인생 영화는 무엇인가요?
-            </label>
-            <input
-              type="text"
-              id="favoriteMovie"
-              class="movie-search-input"
-              placeholder="영화 제목을 입력하세요 (예: 인터스텔라)"
-              autocomplete="off"
-            >
-            <div class="search-results" id="movieSearchResults"></div>
-          </div>
-
-          <!-- Q2: 선호 장르 -->
-          <div class="question-block">
-            <label class="question-label">
-              <span class="question-number">Q2.</span>
-              선호하는 장르를 모두 선택해주세요 (복수 선택 가능)
-            </label>
-            <div class="checkbox-grid">
-              <label class="checkbox-item">
-                <input type="checkbox" name="genre" value="28">
-                <span>액션</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="genre" value="35">
-                <span>코미디</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="genre" value="18">
-                <span>드라마</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="genre" value="10749">
-                <span>로맨스</span>
-              </label>
+          <!-- Q1: 선호 장르 -->
+          <div class="question-page active" data-question="1">
+            <div class="question-progress">
+              <span class="progress-text">1 / 5</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 20%"></div>
+              </div>
             </div>
-          </div>
 
-          <!-- Q3: 선호 무드 -->
-          <div class="question-block">
-            <label class="question-label">
-              <span class="question-number">Q3.</span>
-              어떤 무드의 영화를 선호하시나요?
-            </label>
-            <div class="radio-grid">
-              <label class="radio-item">
-                <input type="radio" name="mood" value="happy">
-                <span>밝고 경쾌한</span>
-              </label>
-              <label class="radio-item">
-                <input type="radio" name="mood" value="dark">
-                <span>어둡고 무거운</span>
-              </label>
-              <label class="radio-item">
-                <input type="radio" name="mood" value="emotional">
-                <span>감성적이고 따뜻한</span>
-              </label>
-              <label class="radio-item">
-                <input type="radio" name="mood" value="intense">
-                <span>긴장감 넘치는</span>
-              </label>
-              <label class="radio-item">
-                <input type="radio" name="mood" value="thoughtful">
-                <span>철학적이고 성찰적인</span>
-              </label>
+            <h2 class="question-title">선호하는 장르를 모두 선택해주세요</h2>
+            <p class="question-subtitle">복수 선택 가능</p>
+
+            <div class="card-grid">
+              <div class="choice-card" data-value="28" data-name="genre">
+                <div class="card-icon">🎬</div>
+                <h3 class="card-title">액션</h3>
+                <p class="card-description">스릴 넘치는 액션과 화려한 장면</p>
+              </div>
+              <div class="choice-card" data-value="35" data-name="genre">
+                <div class="card-icon">😂</div>
+                <h3 class="card-title">코미디</h3>
+                <p class="card-description">유쾌하고 재미있는 이야기</p>
+              </div>
+              <div class="choice-card" data-value="18" data-name="genre">
+                <div class="card-icon">🎭</div>
+                <h3 class="card-title">드라마</h3>
+                <p class="card-description">깊이 있는 인간 드라마</p>
+              </div>
+              <div class="choice-card" data-value="10749" data-name="genre">
+                <div class="card-icon">💕</div>
+                <h3 class="card-title">로맨스</h3>
+                <p class="card-description">감성적인 사랑 이야기</p>
+              </div>
             </div>
+
+            <button class="btn-next-question" data-next="2">다음</button>
           </div>
 
-          <!-- Q4: 불호 요소 -->
-          <div class="question-block">
-            <label class="question-label">
-              <span class="question-number">Q4.</span>
-              피하고 싶은 장르가 있나요? (복수 선택 가능)
-            </label>
-            <div class="checkbox-grid">
-              <label class="checkbox-item">
-                <input type="checkbox" name="dislike" value="violence">
-                <span>과도한 폭력</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="dislike" value="horror">
-                <span>공포 요소</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="dislike" value="sad">
-                <span>슬픈 결말</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="dislike" value="slow">
-                <span>느린 전개</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="dislike" value="complex">
-                <span>복잡한 스토리</span>
-              </label>
+          <!-- Q2: 선호 무드 -->
+          <div class="question-page" data-question="2">
+            <div class="question-progress">
+              <span class="progress-text">2 / 5</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 40%"></div>
+              </div>
             </div>
-          </div>
 
-          <!-- Q5: 탐색 스타일 -->
-          <div class="question-block">
-            <label class="question-label">
-              <span class="question-number">Q5.</span>
-              영화를 고를 때 어떤 기준을 중요하게 생각하시나요?
-            </label>
-            <div class="radio-grid">
-              <label class="radio-item">
-                <input type="radio" name="exploration" value="popularity.desc">
-                <span>인기도 (많은 사람들이 본 영화)</span>
-              </label>
-              <label class="radio-item">
-                <input type="radio" name="exploration" value="vote_average.desc">
-                <span>평점 (평가가 좋은 영화)</span>
-              </label>
-              <label class="radio-item">
-                <input type="radio" name="exploration" value="release_date.desc">
-                <span>최신성 (최근 개봉한 영화)</span>
-              </label>
-              <label class="radio-item">
-                <input type="radio" name="exploration" value="revenue.desc">
-                <span>흥행성 (박스오피스 성공작)</span>
-              </label>
+            <h2 class="question-title">어떤 무드의 영화를 선호하시나요?</h2>
+            <p class="question-subtitle">하나만 선택</p>
+
+            <div class="card-grid">
+              <div class="choice-card single-select" data-value="happy" data-name="mood">
+                <div class="card-icon">☀️</div>
+                <h3 class="card-title">밝고 경쾌한</h3>
+                <p class="card-description">긍정적이고 즐거운 분위기</p>
+              </div>
+              <div class="choice-card single-select" data-value="dark" data-name="mood">
+                <div class="card-icon">🌙</div>
+                <h3 class="card-title">어둡고 무거운</h3>
+                <p class="card-description">진지하고 깊이 있는 이야기</p>
+              </div>
+              <div class="choice-card single-select" data-value="emotional" data-name="mood">
+                <div class="card-icon">💙</div>
+                <h3 class="card-title">감성적이고 따뜻한</h3>
+                <p class="card-description">마음을 울리는 감동</p>
+              </div>
+              <div class="choice-card single-select" data-value="intense" data-name="mood">
+                <div class="card-icon">⚡</div>
+                <h3 class="card-title">긴장감 넘치는</h3>
+                <p class="card-description">손에 땀을 쥐는 스릴</p>
+              </div>
+              <div class="choice-card single-select" data-value="thoughtful" data-name="mood">
+                <div class="card-icon">🤔</div>
+                <h3 class="card-title">철학적이고 성찰적인</h3>
+                <p class="card-description">생각할 거리를 주는 영화</p>
+              </div>
             </div>
+
+            <button class="btn-next-question" data-next="3">다음</button>
           </div>
 
-          <button class="btn-next" id="btnNextToRating">다음 단계로</button>
+          <!-- Q3: 불호 요소 -->
+          <div class="question-page" data-question="3">
+            <div class="question-progress">
+              <span class="progress-text">3 / 5</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 60%"></div>
+              </div>
+            </div>
+
+            <h2 class="question-title">피하고 싶은 요소가 있나요?</h2>
+            <p class="question-subtitle">복수 선택 가능 (없으면 건너뛰기)</p>
+
+            <div class="card-grid">
+              <div class="choice-card" data-value="violence" data-name="dislike">
+                <div class="card-icon">🔫</div>
+                <h3 class="card-title">과도한 폭력</h3>
+                <p class="card-description">잔인한 장면이 많은 영화</p>
+              </div>
+              <div class="choice-card" data-value="horror" data-name="dislike">
+                <div class="card-icon">👻</div>
+                <h3 class="card-title">공포 요소</h3>
+                <p class="card-description">무섭거나 놀라는 장면</p>
+              </div>
+              <div class="choice-card" data-value="sad" data-name="dislike">
+                <div class="card-icon">😢</div>
+                <h3 class="card-title">슬픈 결말</h3>
+                <p class="card-description">우울하거나 비극적인 엔딩</p>
+              </div>
+              <div class="choice-card" data-value="slow" data-name="dislike">
+                <div class="card-icon">🐌</div>
+                <h3 class="card-title">느린 전개</h3>
+                <p class="card-description">템포가 느린 영화</p>
+              </div>
+              <div class="choice-card" data-value="complex" data-name="dislike">
+                <div class="card-icon">🧩</div>
+                <h3 class="card-title">복잡한 스토리</h3>
+                <p class="card-description">이해하기 어려운 구조</p>
+              </div>
+            </div>
+
+            <button class="btn-next-question" data-next="4">다음</button>
+          </div>
+
+          <!-- Q4: 탐색 스타일 -->
+          <div class="question-page" data-question="4">
+            <div class="question-progress">
+              <span class="progress-text">4 / 5</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 80%"></div>
+              </div>
+            </div>
+
+            <h2 class="question-title">영화를 고를 때 어떤 기준을 중요하게 생각하시나요?</h2>
+            <p class="question-subtitle">하나만 선택</p>
+
+            <div class="card-grid">
+              <div class="choice-card single-select" data-value="popularity.desc" data-name="exploration">
+                <div class="card-icon">🔥</div>
+                <h3 class="card-title">인기도</h3>
+                <p class="card-description">많은 사람들이 본 영화</p>
+              </div>
+              <div class="choice-card single-select" data-value="vote_average.desc" data-name="exploration">
+                <div class="card-icon">⭐</div>
+                <h3 class="card-title">평점</h3>
+                <p class="card-description">평가가 좋은 영화</p>
+              </div>
+              <div class="choice-card single-select" data-value="release_date.desc" data-name="exploration">
+                <div class="card-icon">🆕</div>
+                <h3 class="card-title">최신성</h3>
+                <p class="card-description">최근 개봉한 영화</p>
+              </div>
+              <div class="choice-card single-select" data-value="revenue.desc" data-name="exploration">
+                <div class="card-icon">💰</div>
+                <h3 class="card-title">흥행성</h3>
+                <p class="card-description">박스오피스 성공작</p>
+              </div>
+            </div>
+
+            <button class="btn-next-question" data-next="5">다음</button>
+          </div>
+
+          <!-- Q5: 인생 영화 (마지막) -->
+          <div class="question-page" data-question="5">
+            <div class="question-progress">
+              <span class="progress-text">5 / 5</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 100%"></div>
+              </div>
+            </div>
+
+            <h2 class="question-title">당신의 인생 영화는 무엇인가요?</h2>
+            <p class="question-subtitle">선택사항 (건너뛰기 가능)</p>
+
+            <div class="movie-search-container">
+              <input
+                type="text"
+                id="favoriteMovie"
+                class="movie-search-input"
+                placeholder="영화 제목을 입력하세요 (예: 인터스텔라)"
+                autocomplete="off"
+              >
+              <div class="search-results" id="movieSearchResults"></div>
+            </div>
+
+            <button class="btn-next-question" id="btnNextToRating" data-next="vs">VS 게임 시작하기</button>
+          </div>
         </div>
 
         <!-- 2단계: 별점 평가 -->

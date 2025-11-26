@@ -56,20 +56,140 @@ function initSurveyPopup() {
    ============================================ */
 
 /**
- * 첫 번째 팝업 핸들러 설정
- * Setup first popup handlers
+ * 첫 번째 팝업 핸들러 설정 (카드 기반 네비게이션)
+ * Setup first popup handlers with card-based navigation
  */
 function setupFirstPopupHandlers() {
-  const movieInput = document.getElementById('favoriteMovie');
-  const searchResults = document.getElementById('movieSearchResults');
-  const btnNext = document.getElementById('btnNextToRating');
+  const firstPopup = document.getElementById('firstPopup');
 
-  if (!movieInput || !searchResults || !btnNext) {
-    console.error('First popup elements not found');
-    return;
+  // 카드 클릭 이벤트 (Choice card click events)
+  firstPopup.addEventListener('click', (e) => {
+    const card = e.target.closest('.choice-card');
+    if (!card) return;
+
+    const isSingleSelect = card.classList.contains('single-select');
+    const questionPage = card.closest('.question-page');
+
+    if (isSingleSelect) {
+      // 단일 선택: 같은 페이지의 다른 카드 선택 해제
+      questionPage.querySelectorAll('.choice-card.single-select').forEach(c => {
+        c.classList.remove('selected');
+      });
+      card.classList.add('selected');
+    } else {
+      // 복수 선택: 토글
+      card.classList.toggle('selected');
+    }
+  });
+
+  // 다음 버튼 클릭 이벤트 (Next button click events)
+  firstPopup.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-next-question');
+    if (!btn) return;
+
+    const nextPage = btn.dataset.next;
+    const currentPage = btn.closest('.question-page');
+    const questionNum = currentPage.dataset.question;
+
+    // 현재 페이지 데이터 수집 및 검증
+    if (!validateAndSaveQuestion(questionNum, currentPage)) {
+      return;
+    }
+
+    if (nextPage === 'vs') {
+      // VS 게임으로 이동
+      moveToVSGame();
+    } else {
+      // 다음 질문 페이지로 이동
+      navigateToQuestion(parseInt(nextPage));
+    }
+  });
+
+  // 영화 검색 기능 (Movie search functionality)
+  setupMovieSearch();
+}
+
+/**
+ * 질문 페이지 이동
+ */
+function navigateToQuestion(pageNum) {
+  const pages = document.querySelectorAll('.question-page');
+  pages.forEach(page => {
+    const num = parseInt(page.dataset.question);
+    if (num === pageNum) {
+      page.classList.add('active');
+    } else {
+      page.classList.remove('active');
+    }
+  });
+}
+
+/**
+ * 질문 검증 및 저장
+ */
+function validateAndSaveQuestion(questionNum, page) {
+  const selectedCards = page.querySelectorAll('.choice-card.selected');
+  const dataName = selectedCards[0]?.dataset.name;
+
+  switch (questionNum) {
+    case '1': // 장르
+      if (selectedCards.length === 0) {
+        alert('최소 1개 이상의 장르를 선택해주세요.');
+        return false;
+      }
+      userProfile.genres = Array.from(selectedCards).map(card =>
+        parseInt(card.dataset.value)
+      );
+      break;
+
+    case '2': // 무드
+      if (selectedCards.length === 0) {
+        alert('무드를 선택해주세요.');
+        return false;
+      }
+      userProfile.mood = selectedCards[0].dataset.value;
+      break;
+
+    case '3': // 불호 요소 (선택사항)
+      userProfile.dislikes = Array.from(selectedCards).map(card =>
+        card.dataset.value
+      );
+      break;
+
+    case '4': // 탐색 스타일
+      if (selectedCards.length === 0) {
+        alert('탐색 스타일을 선택해주세요.');
+        return false;
+      }
+      userProfile.sortBy = selectedCards[0].dataset.value;
+      break;
+
+    case '5': // 인생 영화 (선택사항)
+      // favoriteMovie는 검색을 통해 이미 저장됨
+      break;
   }
 
-  // Q1: 영화 검색 자동완성 (Movie search autocomplete)
+  return true;
+}
+
+/**
+ * VS 게임으로 이동
+ */
+async function moveToVSGame() {
+  document.getElementById('firstPopup').classList.add('hidden');
+  document.getElementById('secondPopup').classList.remove('hidden');
+  await loadSecondPopupMovies();
+}
+
+/**
+ * 영화 검색 설정
+ */
+function setupMovieSearch() {
+  const movieInput = document.getElementById('favoriteMovie');
+  const searchResults = document.getElementById('movieSearchResults');
+
+  if (!movieInput || !searchResults) return;
+
   let searchTimeout;
   movieInput.addEventListener('input', async (e) => {
     clearTimeout(searchTimeout);
@@ -82,13 +202,11 @@ function setupFirstPopupHandlers() {
 
     searchTimeout = setTimeout(async () => {
       try {
-        // 한국어와 영어 검색 병렬 처리 (Parallel Korean and English search)
         const [koData, enData] = await Promise.all([
           window.tmdbApi.searchMovies(query, 1, { language: 'ko-KR' }),
           window.tmdbApi.searchMovies(query, 1, { language: 'en-US' })
         ]);
 
-        // 중복 제거 (Remove duplicates)
         const allMovies = [...koData.results];
         enData.results.forEach(movie => {
           if (!allMovies.find(m => m.id === movie.id)) {
@@ -129,48 +247,6 @@ function setupFirstPopupHandlers() {
         searchResults.innerHTML = '<div style="padding: 12px; color: var(--text-muted);">검색 중 오류가 발생했습니다.</div>';
       }
     }, 300);
-  });
-
-  // 다음 단계 버튼 (Next button)
-  btnNext.addEventListener('click', async () => {
-    // Q2: 선호 장르 수집 (Collect preferred genres)
-    const selectedGenres = Array.from(document.querySelectorAll('input[name="genre"]:checked'))
-      .map(input => parseInt(input.value));
-
-    if (selectedGenres.length === 0) {
-      alert('선호하는 장르를 최소 1개 이상 선택해주세요.');
-      return;
-    }
-
-    // Q3: 선호 무드 수집 (Collect preferred mood)
-    const selectedMood = document.querySelector('input[name="mood"]:checked');
-    if (!selectedMood) {
-      alert('선호하는 무드를 선택해주세요.');
-      return;
-    }
-
-    // Q4: 불호 요소 수집 (Collect dislikes)
-    const selectedDislikes = Array.from(document.querySelectorAll('input[name="dislike"]:checked'))
-      .map(input => input.value);
-
-    // Q5: 탐색 스타일 수집 (Collect exploration style)
-    const selectedExploration = document.querySelector('input[name="exploration"]:checked');
-    if (!selectedExploration) {
-      alert('탐색 스타일을 선택해주세요.');
-      return;
-    }
-
-    // 프로필에 저장 (Save to profile)
-    userProfile.genres = selectedGenres;
-    userProfile.mood = selectedMood.value;
-    userProfile.dislikes = selectedDislikes;
-    userProfile.sortBy = selectedExploration.value;
-
-    // 2단계로 이동 (Move to step 2)
-    document.getElementById('firstPopup').classList.add('hidden');
-    document.getElementById('secondPopup').classList.remove('hidden');
-
-    await loadSecondPopupMovies();
   });
 }
 
