@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pictos - 취향 설문</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/vs-game.css">
 </head>
 <body>
   <!-- ==================== 취향 확인 팝업 섹션 ==================== -->
@@ -169,15 +170,13 @@
           </div>
 
           <div class="step2-header">
-            <h3>거의 다 왔어요! 🎬</h3>
-            <p>아래 영화들에 별점을 매겨주세요. 더 정확한 추천을 위해 사용됩니다.</p>
+            <h3>VS 게임으로 취향 파악하기! 🎮</h3>
+            <p>두 영화 중 더 마음에 드는 영화를 선택해주세요.</p>
           </div>
 
           <div class="rating-grid" id="movieRatingGrid">
-            <!-- JavaScript에서 동적으로 생성됨 -->
+            <!-- VS 게임이 여기에 동적으로 생성됨 -->
           </div>
-
-          <button class="btn-analyze" id="btnAnalyzeComplete">취향 분석 완료</button>
         </div>
 
         <!-- 3단계: 결과 -->
@@ -201,7 +200,6 @@
 
       <div class="popup-footer">
         <button class="btn-skip" id="btnSkipSurvey">건너뛰기</button>
-        <button class="btn-submit" id="btnSubmitSurvey">추천받기</button>
       </div>
     </div>
   </section>

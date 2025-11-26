@@ -281,6 +281,20 @@ function setupEventListeners() {
     if (event.data.action === 'closePopup') {
       const popupFrame = document.getElementById('popupFrame');
       if (popupFrame) popupFrame.style.display = 'none';
+
+      // 추천 영화 5개를 받아서 저장
+      if (event.data.recommendedMovies && event.data.recommendedMovies.length > 0) {
+        const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        userProfile.recommendedMovies = event.data.recommendedMovies;
+        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+        // 서버 데이터에도 저장
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+          localStorage.setItem(`server_${currentUser.username}_profile`, JSON.stringify(userProfile));
+        }
+      }
+
       initializeMainContent();
     }
   });

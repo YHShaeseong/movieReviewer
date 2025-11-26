@@ -57,12 +57,19 @@ export function toggleWatchlist(movie, event) {
 
   const watchlist = getWatchlist();
   const index = watchlist.findIndex(m => m.id === movie.id);
+  const MAX_WATCHLIST_SIZE = 10;
 
   if (index > -1) {
     // 워치리스트에서 제거 (Remove from watchlist)
     watchlist.splice(index, 1);
     alert(`"${movie.title}"이(가) 워치리스트에서 제거되었습니다.`);
   } else {
+    // 최대 개수 확인 (Check maximum limit)
+    if (watchlist.length >= MAX_WATCHLIST_SIZE) {
+      alert(`워치리스트는 최대 ${MAX_WATCHLIST_SIZE}개까지만 저장할 수 있습니다.`);
+      return;
+    }
+
     // 워치리스트에 추가 (Add to watchlist)
     watchlist.push({
       id: movie.id,

@@ -146,10 +146,18 @@ export async function loadHeroCarousel() {
     let movieList;
 
     if (savedProfile) {
-      // 사용자 프로필 기반 추천 (Profile-based recommendations)
-      const profile = enrichProfileWithDislikedGenres(JSON.parse(savedProfile));
-      const data = await window.tmdbApi.getPersonalizedRecommendations(profile);
-      movieList = data.results.slice(0, CONFIG.HERO_CAROUSEL_COUNT);
+      const profile = JSON.parse(savedProfile);
+
+      // VS 게임 추천 영화가 있으면 우선 사용
+      if (profile.recommendedMovies && profile.recommendedMovies.length > 0) {
+        console.log('VS 게임 추천 영화 사용:', profile.recommendedMovies.length, '개');
+        movieList = profile.recommendedMovies.slice(0, CONFIG.HERO_CAROUSEL_COUNT);
+      } else {
+        // 사용자 프로필 기반 추천 (Profile-based recommendations)
+        const enrichedProfile = enrichProfileWithDislikedGenres(profile);
+        const data = await window.tmdbApi.getPersonalizedRecommendations(enrichedProfile);
+        movieList = data.results.slice(0, CONFIG.HERO_CAROUSEL_COUNT);
+      }
     } else {
       // 인기 영화 (Popular movies)
       const data = await window.tmdbApi.getPopularMovies(1);

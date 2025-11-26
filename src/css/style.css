@@ -1,5 +1,5 @@
 /* ============================================
-   전역 설정 - 모든 요소에 적용되는 기본 스타일
+   전역 설정 - 모든 요소에 적용되는 기본 스타일     // 자주 쓰는 색깔들 정리 
    ============================================ */
 :root {
   /* Picktos 쿨톤 컬러 팔레트 */
@@ -816,9 +816,9 @@ body {
 /* 팝업 컨테이너 */
 .popup-container {
   position: relative;
-  width: 90%;
-  max-width: 800px;
-  max-height: 85vh;
+  width: 95%;
+  max-width: 1200px;
+  max-height: 90vh;
   background: linear-gradient(135deg, var(--bg-card) 0%, #1a2332 100%);
   border-radius: 24px;
   padding: 40px;
@@ -1203,10 +1203,10 @@ body {
 }
 
 .rating-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 20px;
+  display: block;
+  width: 100%;
   margin-bottom: 30px;
+  min-height: 600px;
 }
 
 .rating-card {

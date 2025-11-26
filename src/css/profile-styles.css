@@ -31,8 +31,10 @@
    ============================================ */
 .profile-modal-content {
   max-width: 700px;
+  max-height: 90vh;
   padding: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* 프로필 커버 영역 */
@@ -138,7 +140,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-}
+} 
 
 .profile-movie-card {
   position: relative;
@@ -192,7 +194,7 @@
   font-size: 14px;
 }
 
-/* 프로필 수정 버튼 */
+/* 프로필 수정 버튼 */     /* 공부 여기까지함 일단. */ 
 .profile-edit-btn {
   margin: 0 40px 40px 40px;
   width: calc(100% - 80px);

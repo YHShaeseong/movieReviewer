@@ -38,7 +38,7 @@
   <!-- 로그인/회원가입 모달 -->
   <div id="authModal" class="modal" style="display: none;">
     <div class="modal-content">
-      <span class="modal-close">&times;</span>
+      <span class="modal-close">&times;</span>  
       <h2 id="authTitle">로그인</h2>
       <form id="authForm">
         <input type="text" id="authUsername" placeholder="아이디" required>
@@ -89,10 +89,47 @@
       </div>
 
       <div class="profile-content">
+        <!-- 통계 -->
+        <div class="profile-section">
+          <h3 class="profile-section-title">나의 통계</h3>   <!-- 지우자. 나의 통계 -->
+          <div class="profile-stats">
+            <div class="profile-stat-item">
+              <div class="profile-stat-value" id="profileGenreCount">0</div>
+              <div class="profile-stat-label">선호 장르</div>
+            </div>
+            <div class="profile-stat-item">
+              <div class="profile-stat-value" id="profileRatingCount">0</div>
+              <div class="profile-stat-label">평가한 영화</div>   <!-- 지우자. 이 내용 -->
+            </div>
+            <div class="profile-stat-item">
+              <div class="profile-stat-value" id="profileAvgRating">-</div>
+              <div class="profile-stat-label">평균 평점</div>    <!-- 지우자. 이 내용 -->
+            </div>
+          </div>
+        </div>
+
         <!-- 선호 장르 -->
         <div class="profile-section">
           <h3 class="profile-section-title">내가 좋아하는 장르</h3>
           <div id="profileGenres" class="profile-genre-tags"></div>
+        </div>
+
+        <!-- 무드 -->
+        <div class="profile-section">
+          <h3 class="profile-section-title">선호하는 무드</h3>
+          <div id="profileMood" class="profile-mood"></div>
+        </div>
+
+        <!-- 탐색 스타일 -->
+        <div class="profile-section">
+          <h3 class="profile-section-title">탐색 기준</h3>
+          <div id="profileExploration" class="profile-exploration"></div>
+        </div>
+
+        <!-- 피하고 싶은 요소 -->
+        <div class="profile-section">
+          <h3 class="profile-section-title">피하고 싶은 장르</h3>
+          <div id="profileDislikes" class="profile-dislikes"></div>
         </div>
 
         <!-- 최근 평가한 영화 -->
@@ -151,7 +188,7 @@
       </select>
     </div>
     <p>실시간으로 가장 많은 사람들이 찾는 영화들</p>
-    <div id="movies" class="movie-grid"></div>
+    <div id="movies" class="movie-grid"></div>   <!-- 쓸모 없는 클래스 지우기 -->
     <div class="view-more-container">
       <button id="viewMoreBtn" class="view-more-btn" style="display: none;">
         더보기 (100개 전체보기)
@@ -163,8 +200,8 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-logo">Pictos</div>
-      <p>개인 취향에 맞는 영화를 추천받고, 다양한 리뷰와 평점을 확인할 수 있는 최고의 영화 추천 서비스입니다.</p>
-      <p class="copyright">© 2024 Pictos. All rights reserved.</p>
+      <p>개인 취향에 맞는 영화를 추천받고, 다양한 리뷰와 평점을 확인할 수 있는 영화 추천 서비스입니다.</p>
+      <p class="copyright">© 2025 Pictos. All rights reserved.</p>
     </div>
   </footer>
 

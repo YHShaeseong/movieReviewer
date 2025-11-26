@@ -492,6 +492,38 @@ export function toggleReview(btn) {
    ============================================ */
 
 /**
+ * 스트리밍 서비스별 최적 검색 쿼리 생성
+ * @param {number} providerId - 스트리밍 서비스 ID
+ * @param {string} originalTitle - 영화 원제목 (영어)
+ * @param {string} koreanTitle - 한글 제목
+ * @returns {string} 검색 쿼리
+ */
+function getSearchQuery(providerId, originalTitle, koreanTitle) {
+  // Disney+는 영어 제목이 더 잘 검색됨
+  if (providerId === 337) {
+    return originalTitle;
+  }
+
+  // Netflix는 영어 제목이 가장 정확
+  if (providerId === 8 || providerId === 1796) {
+    return originalTitle;
+  }
+
+  // Apple TV+는 영어 제목 선호
+  if (providerId === 350 || providerId === 2) {
+    return originalTitle;
+  }
+
+  // 한국 서비스(Wavve, Watcha)는 한글 제목 사용
+  if (providerId === 356 || providerId === 97) {
+    return koreanTitle;
+  }
+
+  // 기타 서비스는 영어 제목
+  return originalTitle;
+}
+
+/**
  * 스트리밍 서비스 선택 모달 열기
  * @param {number} movieId - 영화 ID
  * @param {string} encodedTitle - URL 인코딩된 영화 제목
@@ -500,13 +532,21 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
   const title = decodeURIComponent(encodedTitle);
 
   try {
-    const watchData = await window.tmdbApi.getWatchProviders(movieId);
+    // 영화 정보와 스트리밍 정보를 함께 가져오기 (Get movie info and streaming together)
+    const [movieInfo, watchData] = await Promise.all([
+      window.tmdbApi.getCompleteMovieInfo(movieId),
+      window.tmdbApi.getWatchProviders(movieId)
+    ]);
+
     const krProviders = watchData.results?.KR;
 
     if (!krProviders) {
       alert('한국에서 이용 가능한 스트리밍 서비스가 없습니다.');
       return;
     }
+
+    // 검색용 쿼리 생성 (Create search query)
+    const originalTitle = movieInfo.original_title || movieInfo.title;
 
     // 모든 제공자 합치기 (Combine all providers)
     const allProviders = [
@@ -531,8 +571,9 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
     if (uniqueProviders.length === 1) {
       const provider = uniqueProviders[0];
       const streamingInfo = STREAMING_URLS[provider.provider_id];
+      const searchQuery = getSearchQuery(provider.provider_id, originalTitle, title);
       const searchUrl = streamingInfo
-        ? streamingInfo.url + encodeURIComponent(title)
+        ? streamingInfo.url + encodeURIComponent(searchQuery)
         : krProviders.link;
 
       window.open(searchUrl, '_blank');
@@ -561,8 +602,9 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
     const listContainer = document.getElementById('watchProvidersList');
     listContainer.innerHTML = uniqueProviders.map(provider => {
       const streamingInfo = STREAMING_URLS[provider.provider_id];
+      const searchQuery = getSearchQuery(provider.provider_id, originalTitle, title);
       const searchUrl = streamingInfo
-        ? streamingInfo.url + encodeURIComponent(title)
+        ? streamingInfo.url + encodeURIComponent(searchQuery)
         : krProviders.link;
 
       return `
@@ -578,7 +620,6 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
       `;
     }).join('');
 
-    document.getElementById('tmdbWatchLink').href = krProviders.link || '#';
     modal.style.display = 'flex';
   } catch (error) {
     console.error('스트리밍 정보 로딩 실패:', error);

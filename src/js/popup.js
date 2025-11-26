@@ -9,6 +9,7 @@
 
 import { GENRE_MAP, DISLIKE_MAPPING } from './config/constants.js';
 import { getKoreanName } from './utils/utils.js';
+import { VSGameEngine } from './vs-game/vsGameEngine.js';
 
 /* ============================================
    사용자 프로필 객체 (User Profile Object)
@@ -19,8 +20,12 @@ let userProfile = {
   mood: null,            // 선호 무드 (Preferred mood)
   dislikes: [],          // 불호 요소 (Dislikes)
   sortBy: null,          // 탐색 스타일 (Exploration style)
-  ratings: []            // 영화 별점 (Movie ratings)
+  ratings: [],           // 영화 별점 (Movie ratings)
+  vsProfile: null        // VS 게임 분석 결과 (3-Layer Profile)
 };
+
+// VS 게임 엔진 인스턴스
+let vsEngine = null;
 
 /* ============================================
    팝업 초기화 (Popup Initialization)
@@ -170,164 +175,170 @@ function setupFirstPopupHandlers() {
 }
 
 /* ============================================
-   2단계: 별점 평가 (Step 2: Rating Movies)
+   2단계: VS 게임 (Step 2: VS Game)
    ============================================ */
 
 /**
- * 별점 평가 팝업 영화 로드
- * Load movies for rating popup
+ * VS 게임 시작
+ * Start VS game with 3-Layer Deep Dive Logic
  */
 async function loadSecondPopupMovies() {
   try {
-    const genreIds = userProfile.genres.join(',');
+    // VS 엔진 초기화
+    vsEngine = new VSGameEngine();
 
-    // 불호 장르 계산 (Calculate disliked genres)
-    const withoutGenres = [];
-    if (userProfile.dislikes) {
-      userProfile.dislikes.forEach(dislike => {
-        const mapping = DISLIKE_MAPPING[dislike];
-        if (mapping && mapping.genres) {
-          withoutGenres.push(...mapping.genres);
-        }
-      });
-    }
+    // 영화 데이터 사전 로드
+    const loadingMessage = showLoadingMessage('영화 데이터를 불러오는 중...');
+    await vsEngine.preloadMovies();
+    hideLoadingMessage(loadingMessage);
 
-    // 인기 있고 유명한 영화 우선 (Prioritize popular and famous movies)
-    let movies = await window.tmdbApi.discoverMovies({
-      with_genres: genreIds,
-      without_genres: withoutGenres.length > 0 ? withoutGenres.join(',') : undefined,
-      sort_by: 'popularity.desc',
-      'vote_count.gte': 2000,
-      'vote_average.gte': 7.0,
-      page: 1
-    });
-
-    let movieList = movies.results;
-
-    // 결과 부족 시 조건 완화 (Relax conditions if not enough results)
-    if (movieList.length < 5) {
-      movies = await window.tmdbApi.discoverMovies({
-        with_genres: genreIds,
-        without_genres: withoutGenres.length > 0 ? withoutGenres.join(',') : undefined,
-        sort_by: 'popularity.desc',
-        'vote_count.gte': 1000,
-        'vote_average.gte': 6.5,
-        page: 1
-      });
-      movieList = movies.results;
-    }
-
-    const ratingGrid = document.getElementById('movieRatingGrid');
-    ratingGrid.innerHTML = '';
-
-    // 상위 5개 영화 표시 (Show top 5 movies)
-    movieList.slice(0, 5).forEach((movie, index) => {
-      const ratingCard = document.createElement('div');
-      ratingCard.className = 'rating-card';
-      ratingCard.dataset.movieId = movie.id;
-      ratingCard.innerHTML = `
-        <img src="${movie.poster_path ? window.tmdbApi.getImageUrl(movie.poster_path, 'w500') : 'https://via.placeholder.com/200x300'}" alt="${movie.title}">
-        <div class="rating-info">
-          <div class="rating-title">${movie.title}</div>
-          <div class="rating-year">${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'} · ★ ${movie.vote_average.toFixed(1)}</div>
-          <div class="star-rating-input" data-movie-id="${movie.id}">
-            ${[1, 2, 3, 4, 5].map(star => `<span class="star" data-rating="${star}">☆</span>`).join('')}
-          </div>
-          <button class="btn-pass" data-movie-id="${movie.id}">Pass</button>
-        </div>
-      `;
-
-      // 별점 클릭 이벤트 (Star click event)
-      const stars = ratingCard.querySelectorAll('.star');
-      stars.forEach(star => {
-        star.addEventListener('click', function() {
-          const rating = parseInt(this.dataset.rating);
-          const movieId = movie.id;
-
-          // 별점 표시 업데이트 (Update star display)
-          stars.forEach((s, i) => {
-            s.textContent = i < rating ? '★' : '☆';
-          });
-
-          // 프로필에 저장 (Save to profile)
-          const existingIndex = userProfile.ratings.findIndex(r => r.movieId === movieId);
-          if (existingIndex >= 0) {
-            userProfile.ratings[existingIndex].rating = rating;
-            userProfile.ratings[existingIndex].passed = false;
-          } else {
-            userProfile.ratings.push({
-              movieId: movie.id,
-              title: movie.title,
-              poster_path: movie.poster_path,
-              rating: rating,
-              genre_ids: movie.genre_ids,
-              passed: false
-            });
-          }
-
-          // Pass 버튼 상태 초기화 (Reset pass button)
-          const passBtn = ratingCard.querySelector('.btn-pass');
-          passBtn.classList.remove('passed');
-          passBtn.textContent = 'Pass';
-        });
-      });
-
-      // Pass 버튼 클릭 이벤트 (Pass button click event)
-      const passBtn = ratingCard.querySelector('.btn-pass');
-      passBtn.addEventListener('click', function() {
-        const movieId = parseInt(this.dataset.movieId);
-        const existingIndex = userProfile.ratings.findIndex(r => r.movieId === movieId);
-
-        if (this.classList.contains('passed')) {
-          // Pass 취소 (Cancel pass)
-          this.classList.remove('passed');
-          this.textContent = 'Pass';
-          if (existingIndex >= 0) {
-            userProfile.ratings.splice(existingIndex, 1);
-          }
-          stars.forEach(s => s.textContent = '☆');
-        } else {
-          // Pass 처리 (Mark as passed)
-          this.classList.add('passed');
-          this.textContent = 'Passed';
-          stars.forEach(s => s.textContent = '☆');
-
-          if (existingIndex >= 0) {
-            userProfile.ratings[existingIndex].rating = 0;
-            userProfile.ratings[existingIndex].passed = true;
-          } else {
-            userProfile.ratings.push({
-              movieId: movie.id,
-              rating: 0,
-              genre_ids: movie.genre_ids,
-              passed: true
-            });
-          }
-        }
-      });
-
-      ratingGrid.appendChild(ratingCard);
-    });
-
-    // 분석 완료 버튼 (Complete analysis button)
-    const btnAnalyze = document.getElementById('btnAnalyzeComplete');
-    btnAnalyze.onclick = async () => {
-      const validRatings = userProfile.ratings.filter(r => !r.passed);
-
-      if (validRatings.length < 3) {
-        alert('최소 3개 이상의 영화에 별점을 매겨주세요. (Pass는 제외)');
-        return;
-      }
-
-      // 3단계로 이동 (Move to step 3)
-      document.getElementById('secondPopup').classList.add('hidden');
-      document.getElementById('resultPopup').classList.remove('hidden');
-
-      await showResultPopup();
-    };
+    console.log('VS 게임 준비 완료!');
+    renderVSRound();
   } catch (error) {
-    console.error('별점 평가 팝업 영화 로드 실패:', error);
+    console.error('VS 게임 로드 실패:', error);
+    alert('영화 정보를 불러오는데 실패했습니다. 다시 시도해주세요.');
   }
+}
+
+/**
+ * VS 라운드 렌더링
+ * Render VS round with 3-Layer analysis
+ */
+function renderVSRound() {
+  const ratingGrid = document.getElementById('movieRatingGrid');
+  const roundData = vsEngine.getCurrentRound();
+
+  if (!roundData) {
+    console.error('라운드 데이터 없음');
+    return;
+  }
+
+  const { movieAData, movieBData, progress, theme, description } = roundData;
+
+  ratingGrid.innerHTML = `
+    <div class="vs-container">
+      <div class="vs-round-header">
+        <div class="vs-progress">
+          <span class="vs-round-number">${progress.current} / ${progress.total}</span>
+          <div class="vs-progress-bar">
+            <div class="vs-progress-fill" style="width: ${progress.percentage}%"></div>
+          </div>
+        </div>
+        <h3 class="vs-theme">${theme}</h3>
+        <p class="vs-description">${description}</p>
+      </div>
+
+      <div class="vs-battle">
+        <div class="vs-movie-card" data-choice="A">
+          <div class="vs-movie-poster">
+            <img src="${movieAData.poster_path ? window.tmdbApi.getImageUrl(movieAData.poster_path, 'w500') : 'https://via.placeholder.com/300x450'}"
+                 alt="${movieAData.title}">
+          </div>
+          <div class="vs-movie-info">
+            <h4 class="vs-movie-title">${movieAData.title}</h4>
+            <p class="vs-movie-meta">${movieAData.release_date ? movieAData.release_date.split('-')[0] : 'N/A'} · ★ ${movieAData.vote_average ? movieAData.vote_average.toFixed(1) : 'N/A'}</p>
+            <p class="vs-movie-genres">${movieAData.genres ? movieAData.genres.slice(0, 3).map(g => g.name).join(', ') : ''}</p>
+          </div>
+          <button class="vs-select-btn">이 영화 선택</button>
+        </div>
+
+        <div class="vs-divider">
+          <span class="vs-text">VS</span>
+        </div>
+
+        <div class="vs-movie-card" data-choice="B">
+          <div class="vs-movie-poster">
+            <img src="${movieBData.poster_path ? window.tmdbApi.getImageUrl(movieBData.poster_path, 'w500') : 'https://via.placeholder.com/300x450'}"
+                 alt="${movieBData.title}">
+          </div>
+          <div class="vs-movie-info">
+            <h4 class="vs-movie-title">${movieBData.title}</h4>
+            <p class="vs-movie-meta">${movieBData.release_date ? movieBData.release_date.split('-')[0] : 'N/A'} · ★ ${movieBData.vote_average ? movieBData.vote_average.toFixed(1) : 'N/A'}</p>
+            <p class="vs-movie-genres">${movieBData.genres ? movieBData.genres.slice(0, 3).map(g => g.name).join(', ') : ''}</p>
+          </div>
+          <button class="vs-select-btn">이 영화 선택</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 버튼 이벤트 등록
+  const selectButtons = ratingGrid.querySelectorAll('.vs-select-btn');
+  selectButtons.forEach(btn => {
+    btn.addEventListener('click', handleVSSelection);
+  });
+}
+
+/**
+ * VS 선택 처리
+ * Handle VS selection with 3-Layer analysis
+ */
+function handleVSSelection(e) {
+  const card = e.target.closest('.vs-movie-card');
+  const choice = card.dataset.choice;
+
+  // 선택 애니메이션
+  card.classList.add('vs-selected');
+
+  // VS 엔진에 선택 전달
+  const currentRoundNum = vsEngine.currentRound;
+  const isGameComplete = vsEngine.selectMovie(choice);
+
+  setTimeout(() => {
+    if (isGameComplete) {
+      // 게임 완료 - 결과 화면으로
+      finishVSGame();
+    } else if (currentRoundNum === 10) {
+      // Phase 1 완료 → Phase 2 진입 메시지 표시
+      showPhase2Transition();
+    } else {
+      // 다음 라운드
+      renderVSRound();
+    }
+  }, 500);
+}
+
+/**
+ * Phase 2 진입 전환 메시지 표시
+ * Show Phase 1→2 transition message with visual changes
+ */
+function showPhase2Transition() {
+  const ratingGrid = document.getElementById('movieRatingGrid');
+
+  // Phase 2 진입 메시지 표시
+  ratingGrid.innerHTML = `
+    <div class="vs-container phase2-transition">
+      <div class="phase2-message">
+        <div class="phase2-icon">✨</div>
+        <h3 class="phase2-title">취향 분석 완료!</h3>
+        <p class="phase2-subtitle">정밀도를 높이기 위해 마지막 5가지를 확인합니다.</p>
+        <div class="phase2-loading">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 2초 후 Phase 2 시작
+  setTimeout(() => {
+    renderVSRound();
+  }, 2000);
+}
+
+/**
+ * VS 게임 완료 처리
+ */
+function finishVSGame() {
+  console.log('VS 게임 완료!');
+
+  // 3-Layer 프로필 분석 결과 저장
+  userProfile.vsProfile = vsEngine.getProfileAnalysis();
+  vsEngine.saveProfile();
+
+  // 결과 화면으로 이동
+  document.getElementById('secondPopup').classList.add('hidden');
+  document.getElementById('resultPopup').classList.remove('hidden');
+  showResultPopup();
 }
 
 /* ============================================
@@ -335,50 +346,128 @@ async function loadSecondPopupMovies() {
    ============================================ */
 
 /**
- * 결과 팝업 표시
- * Show result popup
+ * 결과 팝업 표시 (3-Layer 분석 결과 포함)
+ * Show result popup with 3-Layer analysis
  */
 async function showResultPopup() {
   try {
-    // 사용자 프로필 분석 (Analyze user profile)
-    analyzeUserProfile();
-
-    // 프로필 요약 표시 (Display profile summary)
+    // 프로필 요약 표시 (Display 3-Layer profile summary)
     const profileSummary = document.getElementById('userProfileSummary');
+    const vsProfile = userProfile.vsProfile;
+
     profileSummary.innerHTML = `
       <div class="profile-summary">
-        <h4>당신의 영화 취향 프로필</h4>
-        <p><strong>선호 장르:</strong> ${userProfile.genres.map(id => GENRE_MAP[id]).join(', ')}</p>
-        <p><strong>선호 무드:</strong> ${getMoodLabel(userProfile.mood)}</p>
-        <p><strong>탐색 스타일:</strong> ${getExplorationLabel(userProfile.sortBy)}</p>
+        <h4>🎬 당신의 영화 취향 DNA</h4>
+
+        <div class="profile-layer">
+          <div class="layer-header">
+            <span class="layer-icon">🌍</span>
+            <span class="layer-title">세계관 선호도</span>
+          </div>
+          <div class="layer-result">
+            <strong>${vsProfile.worldview.label}</strong>
+            <span class="percentage">${vsProfile.worldview.percentage}%</span>
+          </div>
+          <p class="layer-description">${vsProfile.worldview.description}</p>
+        </div>
+
+        <div class="profile-layer">
+          <div class="layer-header">
+            <span class="layer-icon">⚡</span>
+            <span class="layer-title">자극 타겟</span>
+          </div>
+          <div class="layer-result">
+            <strong>${vsProfile.stimulation.label}</strong>
+            <span class="percentage">${vsProfile.stimulation.percentage}%</span>
+          </div>
+          <p class="layer-description">${vsProfile.stimulation.description}</p>
+          <div class="stimulation-bar">
+            <div class="stim-item">
+              <span>🧠 Brain</span>
+              <div class="progress-mini">
+                <div class="fill" style="width: ${vsProfile.stimulation.distribution.brain}%"></div>
+              </div>
+              <span>${vsProfile.stimulation.distribution.brain}%</span>
+            </div>
+            <div class="stim-item">
+              <span>❤️ Heart</span>
+              <div class="progress-mini">
+                <div class="fill" style="width: ${vsProfile.stimulation.distribution.heart}%"></div>
+              </div>
+              <span>${vsProfile.stimulation.distribution.heart}%</span>
+            </div>
+            <div class="stim-item">
+              <span>💪 Body</span>
+              <div class="progress-mini">
+                <div class="fill" style="width: ${vsProfile.stimulation.distribution.body}%"></div>
+              </div>
+              <span>${vsProfile.stimulation.distribution.body}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-layer">
+          <div class="layer-header">
+            <span class="layer-icon">🎨</span>
+            <span class="layer-title">감성 텍스처</span>
+          </div>
+          <div class="layer-split">
+            <div class="texture-item">
+              <strong>온도:</strong> ${vsProfile.texture.temperature.label}
+              <span class="percentage">${vsProfile.texture.temperature.percentage}%</span>
+            </div>
+            <div class="texture-item">
+              <strong>밀도:</strong> ${vsProfile.texture.density.label}
+              <span class="percentage">${vsProfile.texture.density.percentage}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-basic">
+          <p><strong>선호 장르:</strong> ${userProfile.genres.map(id => GENRE_MAP[id]).join(', ')}</p>
+          <p><strong>선호 무드:</strong> ${getMoodLabel(userProfile.mood)}</p>
+        </div>
       </div>
     `;
 
-    // 추천 영화 가져오기 (Get recommended movies)
-    const recommendations = await getRecommendedMovies();
+    // VS 게임 결과 기반 추천 영화 가져오기
+    const loadingMessage = showLoadingMessage('맞춤 추천 영화를 찾는 중...');
+    const recommendations = await vsEngine.getRecommendations(1);
+    hideLoadingMessage(loadingMessage);
 
-    // 추천 영화 표시 (Display recommended movies)
+    // 추천 영화 5개 저장 (메인 페이지에서 사용)
+    const top5Movies = recommendations.slice(0, 5);
+    userProfile.recommendedMovies = top5Movies;
+
+    // 추천 영화 표시
     const moviesList = document.getElementById('recommendedMoviesList');
     moviesList.innerHTML = '';
 
-    recommendations.slice(0, 5).forEach(movie => {
-      const movieCard = document.createElement('div');
-      movieCard.className = 'result-movie-card';
-      movieCard.innerHTML = `
-        <img src="${movie.poster_path ? window.tmdbApi.getImageUrl(movie.poster_path, 'w500') : 'https://via.placeholder.com/200x300'}" alt="${movie.title}">
-        <div class="result-movie-info">
-          <div class="result-movie-title">${movie.title}</div>
-          <div class="result-movie-rating">★ ${movie.vote_average.toFixed(1)}</div>
-        </div>
-      `;
-      moviesList.appendChild(movieCard);
-    });
+    if (top5Movies.length === 0) {
+      moviesList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">추천 영화를 찾을 수 없습니다.</p>';
+    } else {
+      top5Movies.forEach(movie => {
+        const movieCard = document.createElement('div');
+        movieCard.className = 'result-movie-card';
+        movieCard.innerHTML = `
+          <img src="${movie.poster_path ? window.tmdbApi.getImageUrl(movie.poster_path, 'w500') : 'https://via.placeholder.com/200x300'}" alt="${movie.title}">
+          <div class="result-movie-info">
+            <div class="result-movie-title">${movie.title}</div>
+            <div class="result-movie-rating">★ ${movie.vote_average.toFixed(1)}</div>
+          </div>
+        `;
+        moviesList.appendChild(movieCard);
+      });
+    }
 
-    // 완료 버튼 (Complete button)
+    // 완료 버튼
     const btnStart = document.getElementById('btnStartBrowsing');
     btnStart.onclick = () => {
       saveUserProfile();
-      window.parent.postMessage({ action: 'closePopup' }, '*');
+      window.parent.postMessage({
+        action: 'closePopup',
+        recommendedMovies: top5Movies
+      }, '*');
     };
   } catch (error) {
     console.error('결과 팝업 표시 실패:', error);
@@ -490,6 +579,44 @@ function getExplorationLabel(sortBy) {
     'revenue.desc': '흥행성'
   };
   return labels[sortBy] || sortBy;
+}
+
+/**
+ * 로딩 메시지 표시
+ * @param {string} message - 로딩 메시지
+ * @returns {HTMLElement} 로딩 요소
+ */
+function showLoadingMessage(message) {
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading-message';
+  loadingDiv.innerHTML = `
+    <div class="loading-spinner"></div>
+    <p>${message}</p>
+  `;
+  loadingDiv.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    z-index: 10000;
+    text-align: center;
+  `;
+  document.body.appendChild(loadingDiv);
+  return loadingDiv;
+}
+
+/**
+ * 로딩 메시지 숨기기
+ * @param {HTMLElement} element - 로딩 요소
+ */
+function hideLoadingMessage(element) {
+  if (element && element.parentNode) {
+    element.parentNode.removeChild(element);
+  }
 }
 
 /* ============================================
