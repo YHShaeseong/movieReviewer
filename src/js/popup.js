@@ -387,8 +387,8 @@ async function showPhase2Transition() {
     <div class="vs-container phase2-transition">
       <div class="phase2-message">
         <div class="phase2-icon">✨</div>
-        <h3 class="phase2-title">취향 분석 완료!</h3>
-        <p class="phase2-subtitle">정밀도를 높이기 위해 마지막 3가지를 확인합니다.</p>
+        <h3 class="phase2-title">첫 번째 분석 완료!</h3>
+        <p class="phase2-subtitle">당신의 취향을 다시 한 번 확인할게요.</p>
         <div class="phase2-loading">
           <div class="loading-spinner"></div>
         </div>
