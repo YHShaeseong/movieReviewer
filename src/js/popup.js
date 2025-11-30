@@ -443,7 +443,7 @@ async function showResultPopup() {
           </div>
           <div class="layer-result">
             <strong>${vsProfile.worldview.label}</strong>
-            <span class="percentage">${vsProfile.worldview.percentage}%</span>
+            <span class="intensity-badge">${vsProfile.worldview.intensity} 선호</span>
           </div>
           <p class="layer-description">${vsProfile.worldview.description}</p>
         </div>
@@ -455,7 +455,7 @@ async function showResultPopup() {
           </div>
           <div class="layer-result">
             <strong>${vsProfile.stimulation.label}</strong>
-            <span class="percentage">${vsProfile.stimulation.percentage}%</span>
+            <span class="intensity-badge">${vsProfile.stimulation.intensity} 선호</span>
           </div>
           <p class="layer-description">${vsProfile.stimulation.description}</p>
           <div class="stimulation-bar">
@@ -491,11 +491,11 @@ async function showResultPopup() {
           <div class="layer-split">
             <div class="texture-item">
               <strong>온도:</strong> ${vsProfile.texture.temperature.label}
-              <span class="percentage">${vsProfile.texture.temperature.percentage}%</span>
+              <span class="intensity-badge">${vsProfile.texture.temperature.intensity}</span>
             </div>
             <div class="texture-item">
               <strong>밀도:</strong> ${vsProfile.texture.density.label}
-              <span class="percentage">${vsProfile.texture.density.percentage}%</span>
+              <span class="intensity-badge">${vsProfile.texture.density.intensity}</span>
             </div>
           </div>
         </div>

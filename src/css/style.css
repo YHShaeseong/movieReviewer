@@ -1583,6 +1583,17 @@ body {
   color: var(--accent-cyan);
 }
 
+.intensity-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  margin-left: 8px;
+}
+
 .result-movies {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

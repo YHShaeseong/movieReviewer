@@ -536,6 +536,14 @@ export class VSGameEngine {
       }
     };
 
+    // 강도 계산 헬퍼 함수
+    const getIntensity = (percent) => {
+      if (percent >= 80) return '매우 강하게';
+      if (percent >= 65) return '강하게';
+      if (percent >= 55) return '약간';
+      return '균형있게';
+    };
+
     // Layer 1: 세계관
     const worldviewTotal = finalScores.worldview.reality + finalScores.worldview.fantasy;
     const realityPercent = Math.round((finalScores.worldview.reality / worldviewTotal) * 100);
@@ -543,12 +551,12 @@ export class VSGameEngine {
 
     const worldviewResult = realityPercent > fantasyPercent ? {
       label: '현실파',
-      percentage: realityPercent,
+      intensity: getIntensity(realityPercent),
       description: '사실적이고 현실적인 이야기를 선호합니다. 다큐멘터리, 역사물, 전기 영화에 끌립니다.',
       attribute: 'reality'
     } : {
       label: '환상파',
-      percentage: fantasyPercent,
+      intensity: getIntensity(fantasyPercent),
       description: '상상력이 넘치는 세계를 좋아합니다. SF, 판타지, 모험 영화를 즐깁니다.',
       attribute: 'fantasy'
     };
@@ -560,20 +568,23 @@ export class VSGameEngine {
     const bodyPercent = Math.round((finalScores.stimulation.body / stimTotal) * 100);
 
     const stimMax = Math.max(brainPercent, heartPercent, bodyPercent);
-    let stimLabel, stimDesc, stimAttr;
+    let stimLabel, stimDesc, stimAttr, stimIntensity;
 
     if (stimMax === brainPercent) {
       stimLabel = '두뇌 자극형';
       stimDesc = '복잡한 스토리와 반전을 즐깁니다. 미스터리, 스릴러, 범죄 영화를 좋아합니다.';
       stimAttr = 'brain';
+      stimIntensity = getIntensity(brainPercent);
     } else if (stimMax === heartPercent) {
       stimLabel = '감성 자극형';
       stimDesc = '감정선이 풍부한 이야기를 좋아합니다. 드라마, 로맨스, 가족 영화에 끌립니다.';
       stimAttr = 'heart';
+      stimIntensity = getIntensity(heartPercent);
     } else {
       stimLabel = '액션 자극형';
       stimDesc = '강렬한 액션과 스릴을 즐깁니다. 액션, 공포, 어드벤처 영화를 선호합니다.';
       stimAttr = 'body';
+      stimIntensity = getIntensity(bodyPercent);
     }
 
     // Layer 3: 감성 텍스처
@@ -589,7 +600,7 @@ export class VSGameEngine {
       worldview: worldviewResult,
       stimulation: {
         label: stimLabel,
-        percentage: stimMax,
+        intensity: stimIntensity,
         description: stimDesc,
         attribute: stimAttr,
         distribution: {
@@ -601,12 +612,12 @@ export class VSGameEngine {
       texture: {
         temperature: {
           label: warmPercent > coldPercent ? '따뜻함' : '차가움',
-          percentage: warmPercent > coldPercent ? warmPercent : coldPercent,
+          intensity: getIntensity(warmPercent > coldPercent ? warmPercent : coldPercent),
           attribute: warmPercent > coldPercent ? 'warm' : 'cold'
         },
         density: {
           label: lightPercent > heavyPercent ? '가벼움' : '무거움',
-          percentage: lightPercent > heavyPercent ? lightPercent : heavyPercent,
+          intensity: getIntensity(lightPercent > heavyPercent ? lightPercent : heavyPercent),
           attribute: lightPercent > heavyPercent ? 'light' : 'heavy'
         }
       },
