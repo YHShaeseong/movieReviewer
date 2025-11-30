@@ -23,9 +23,9 @@ import {
   closeTrailerModal,
   openMovieDetailModal,
   closeMovieDetailModal,
-  toggleReview,
   openWatchProvidersModal,
   closeWatchProvidersModal,
+  selectWatchProvider,
   openWatchlistModal,
   closeWatchlistModal,
   removeFromWatchlistModal
@@ -64,9 +64,9 @@ window.openTrailerModal = openTrailerModal;
 window.closeTrailerModal = closeTrailerModal;
 window.openMovieDetailModal = openMovieDetailModal;
 window.closeMovieDetailModal = closeMovieDetailModal;
-window.toggleReview = toggleReview;
 window.openWatchProvidersModal = openWatchProvidersModal;
 window.closeWatchProvidersModal = closeWatchProvidersModal;
+window.selectWatchProvider = selectWatchProvider;
 window.openWatchlistModal = openWatchlistModal;
 window.closeWatchlistModal = closeWatchlistModal;
 window.removeFromWatchlistModal = removeFromWatchlistModal;

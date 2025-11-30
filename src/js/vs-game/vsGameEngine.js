@@ -7,32 +7,63 @@
 
 /* ============================================
    Phase 1: 탐색전 라운드 구성 (10라운드)
+   동적 영화 선택 템플릿
    ============================================ */
-const PHASE1_ROUNDS = [
+const PHASE1_ROUND_TEMPLATES = [
   // Layer 1: 현실 vs 환상 (3문항)
   {
     phase: 1,
     layer: 'worldview',
     theme: '현실 vs 환상',
     description: '어떤 세계관이 더 끌리나요?',
-    movieA: { id: 424, attribute: 'reality' }, // 쉰들러 리스트 (현실)
-    movieB: { id: 120, attribute: 'fantasy' }  // 반지의 제왕 (환상)
+    movieA: {
+      attribute: 'reality',
+      genres: [18, 36],  // 드라마, 역사
+      minVotes: 10000,
+      minRating: 7.8
+    },
+    movieB: {
+      attribute: 'fantasy',
+      genres: [14, 878],  // 판타지, SF
+      minVotes: 10000,
+      minRating: 7.5
+    }
   },
   {
     phase: 1,
     layer: 'worldview',
     theme: '다큐 vs SF',
     description: '사실 vs 상상, 어디에 더 빠지나요?',
-    movieA: { id: 278, attribute: 'reality' }, // 쇼생크 탈출 (현실)
-    movieB: { id: 157336, attribute: 'fantasy' } // 인터스텔라 (환상)
+    movieA: {
+      attribute: 'reality',
+      genres: [18, 80],  // 드라마, 범죄
+      minVotes: 8000,
+      minRating: 7.8
+    },
+    movieB: {
+      attribute: 'fantasy',
+      genres: [878],  // SF만
+      minVotes: 10000,
+      minRating: 7.5
+    }
   },
   {
     phase: 1,
     layer: 'worldview',
     theme: '역사 vs 미래',
     description: '과거 vs 미래, 어디로 가고 싶나요?',
-    movieA: { id: 13, attribute: 'reality' }, // 포레스트 검프 (현실/역사)
-    movieB: { id: 603, attribute: 'fantasy' } // 매트릭스 (미래/환상)
+    movieA: {
+      attribute: 'reality',
+      genres: [36, 10752],  // 역사, 전쟁
+      minVotes: 5000,
+      minRating: 7.5
+    },
+    movieB: {
+      attribute: 'fantasy',
+      genres: [878, 12],  // SF, 모험
+      minVotes: 10000,
+      minRating: 7.5
+    }
   },
 
   // Layer 2: 자극 타겟 (4문항) - Brain / Heart / Body
@@ -41,32 +72,72 @@ const PHASE1_ROUNDS = [
     layer: 'stimulation',
     theme: '두뇌 vs 심장',
     description: '머리 vs 가슴, 무엇을 더 자극받고 싶나요?',
-    movieA: { id: 27205, attribute: 'brain' }, // 인셉션 (두뇌)
-    movieB: { id: 19404, attribute: 'heart' }  // 다이어리 (심장)
+    movieA: {
+      attribute: 'brain',
+      genres: [53, 80],  // 스릴러, 범죄
+      minVotes: 8000,
+      minRating: 7.5
+    },
+    movieB: {
+      attribute: 'heart',
+      genres: [10749, 18],  // 로맨스, 드라마
+      minVotes: 5000,
+      minRating: 7.3
+    }
   },
   {
     phase: 1,
     layer: 'stimulation',
     theme: '스릴 vs 감동',
     description: '긴장감 vs 눈물, 어떤 걸 원하나요?',
-    movieA: { id: 155, attribute: 'brain' },  // 다크나이트 (두뇌/스릴)
-    movieB: { id: 570670, attribute: 'heart' } // 엘리멘탈 (심장/감동)
+    movieA: {
+      attribute: 'body',
+      genres: [28, 53],  // 액션, 스릴러
+      minVotes: 8000,
+      minRating: 7.3
+    },
+    movieB: {
+      attribute: 'heart',
+      genres: [18, 10751],  // 드라마, 가족
+      minVotes: 5000,
+      minRating: 7.5
+    }
   },
   {
     phase: 1,
     layer: 'stimulation',
     theme: '액션 vs 로맨스',
     description: '몸 vs 마음, 어떤 자극을 원하나요?',
-    movieA: { id: 299534, attribute: 'body' },  // 어벤져스 (신체)
-    movieB: { id: 597, attribute: 'heart' }     // 타이타닉 (심장)
+    movieA: {
+      attribute: 'body',
+      genres: [28],  // 액션만
+      minVotes: 8000,
+      minRating: 7.2
+    },
+    movieB: {
+      attribute: 'heart',
+      genres: [10749],  // 로맨스만
+      minVotes: 5000,
+      minRating: 7.5
+    }
   },
   {
     phase: 1,
     layer: 'stimulation',
     theme: '공포 vs 코미디',
     description: '소름 vs 웃음, 어떤 반응을 원하나요?',
-    movieA: { id: 694, attribute: 'body' },   // 샤이닝 (신체)
-    movieB: { id: 102899, attribute: 'heart' } // 앤트맨 (심장/유머)
+    movieA: {
+      attribute: 'body',
+      genres: [27],  // 공포
+      minVotes: 5000,
+      minRating: 7.0
+    },
+    movieB: {
+      attribute: 'heart',
+      genres: [35],  // 코미디
+      minVotes: 8000,
+      minRating: 7.3
+    }
   },
 
   // Layer 3: 감성 텍스처 (3문항) - 온도(따뜻/차가움) / 밀도(가벼움/무거움)
@@ -75,47 +146,97 @@ const PHASE1_ROUNDS = [
     layer: 'texture',
     theme: '따뜻함 vs 차가움',
     description: '어떤 온도의 영화가 좋나요?',
-    movieA: { id: 862, attribute: 'warm' },    // 토이 스토리 (따뜻함)
-    movieB: { id: 769, attribute: 'cold' }     // 좋은 친구들 (차가움)
+    movieA: {
+      attribute: 'warm',
+      genres: [16, 10751],  // 애니메이션, 가족
+      minVotes: 8000,
+      minRating: 7.5
+    },
+    movieB: {
+      attribute: 'cold',
+      genres: [27, 53],  // 공포, 스릴러
+      minVotes: 5000,
+      minRating: 7.2
+    }
   },
   {
     phase: 1,
     layer: 'texture',
     theme: '가벼움 vs 무거움',
     description: '어떤 무게감의 이야기가 좋나요?',
-    movieA: { id: 293660, attribute: 'light' }, // 데드풀 (가벼움)
-    movieB: { id: 680, attribute: 'heavy' }     // 펄프 픽션 (무거움)
+    movieA: {
+      attribute: 'light',
+      genres: [35, 28],  // 코미디, 액션
+      minVotes: 5000,
+      minRating: 7.0
+    },
+    movieB: {
+      attribute: 'heavy',
+      genres: [18],  // 드라마
+      minVotes: 5000,
+      minRating: 7.8
+    }
   },
   {
     phase: 1,
     layer: 'texture',
     theme: '밝음 vs 어두움',
     description: '어떤 분위기를 선호하나요?',
-    movieA: { id: 109445, attribute: 'light' }, // 겨울왕국 (밝음)
-    movieB: { id: 346, attribute: 'heavy' }     // 세븐 (어두움)
+    movieA: {
+      attribute: 'light',
+      genres: [16, 35],  // 애니메이션, 코미디
+      minVotes: 5000,
+      minRating: 7.0
+    },
+    movieB: {
+      attribute: 'heavy',
+      genres: [80, 53],  // 범죄, 스릴러
+      minVotes: 3000,
+      minRating: 7.5
+    }
   }
 ];
 
 /* ============================================
-   검증용 영화 풀 (Verification Pool)
+   검증용 영화 템플릿 (Verification Templates)
    ============================================ */
-const VERIFICATION_POOL = {
-  // 극단적 선택용
-  reality_extreme: [278, 424, 238],  // 쇼생크, 쉰들러, 대부
-  fantasy_extreme: [120, 122, 157336], // 반지의제왕, 인터스텔라
-
-  // 시각 vs 청각
-  visual: [299534, 284053, 27205], // 어벤져스, 인셉션 (화려한 영상)
-  audio: [313369, 244786, 335984], // 라라랜드, 위플래쉬 (음악 중심)
-
-  // 두뇌 자극
-  brain_high: [27205, 155, 550],   // 인셉션, 다크나이트, 파이트클럽
-
-  // 심장 자극
-  heart_high: [597, 238, 13],      // 타이타닉, 대부, 포레스트 검프
-
-  // 신체 자극
-  body_high: [245891, 299534, 603] // 존 윅, 어벤져스, 매트릭스
+const VERIFICATION_TEMPLATES = {
+  reality_extreme: {
+    genres: [18, 36],
+    minVotes: 10000,
+    minRating: 8.0,
+    keywords: [9715]  // true-story
+  },
+  fantasy_extreme: {
+    genres: [14, 878],
+    minVotes: 10000,
+    minRating: 8.0
+  },
+  visual: {
+    genres: [878, 28, 12],
+    minVotes: 8000,
+    minRating: 7.5
+  },
+  audio: {
+    genres: [10402, 18],  // 음악, 드라마
+    minVotes: 5000,
+    minRating: 7.5
+  },
+  brain_high: {
+    genres: [9648, 53],
+    minVotes: 8000,
+    minRating: 8.0
+  },
+  heart_high: {
+    genres: [10749, 18],
+    minVotes: 5000,
+    minRating: 7.8
+  },
+  body_high: {
+    genres: [28],
+    minVotes: 8000,
+    minRating: 7.5
+  }
 };
 
 /* ============================================
@@ -125,10 +246,13 @@ export class VSGameEngine {
   constructor() {
     this.currentRound = 0;
     this.phase = 1;
-    this.totalRounds = 15; // Phase 1 (10) + Phase 2 (5)
+    this.totalRounds = 13; // Phase 1 (10) + Phase 2 (3)
 
     // 영화 데이터 캐시
     this.moviesCache = {};
+
+    // 라운드별 영화 매핑
+    this.roundMovies = [];
 
     // 사용자 점수 (3-Layer)
     this.scores = {
@@ -155,40 +279,107 @@ export class VSGameEngine {
   }
 
   /* ============================================
-     영화 데이터 사전 로드
+     동적 영화 선택 (장르/주제 기반)
+     ============================================ */
+  async fetchMovieByTemplate(template) {
+    try {
+      const params = {
+        with_genres: template.genres.join(','),
+        'vote_count.gte': template.minVotes,
+        'vote_average.gte': template.minRating,
+        sort_by: 'popularity.desc'
+      };
+
+      if (template.keywords) {
+        params.with_keywords = template.keywords.join(',');
+      }
+
+      const data = await window.tmdbApi.discoverMovies(params);
+
+      if (data.results && data.results.length > 0) {
+        // 장르 필터링: 요청한 장르가 실제로 포함된 영화만 선택
+        const validMovies = data.results.filter(movie => {
+          // 영화의 genre_ids가 템플릿의 genres 중 하나라도 포함하는지 확인
+          return template.genres.some(genreId => movie.genre_ids.includes(genreId));
+        });
+
+        if (validMovies.length > 0) {
+          // 평점과 인기도 조합 점수로 정렬
+          const scoredMovies = validMovies.map(movie => ({
+            ...movie,
+            score: (movie.vote_average * 0.7) + (Math.log(movie.popularity) * 0.3)
+          }));
+
+          scoredMovies.sort((a, b) => b.score - a.score);
+
+          // 상위 3개 중 랜덤 선택
+          const topMovies = scoredMovies.slice(0, 3);
+          const randomIndex = Math.floor(Math.random() * topMovies.length);
+          return topMovies[randomIndex];
+        }
+      }
+
+      // 조건 완화하여 재시도
+      params['vote_average.gte'] = template.minRating - 0.5;
+      params['vote_count.gte'] = Math.floor(template.minVotes / 2);
+
+      const retryData = await window.tmdbApi.discoverMovies(params);
+      if (retryData.results && retryData.results.length > 0) {
+        return retryData.results[0];
+      }
+
+      throw new Error('적합한 영화를 찾을 수 없습니다.');
+    } catch (error) {
+      console.error('영화 검색 실패:', error);
+      throw error;
+    }
+  }
+
+  /* ============================================
+     영화 데이터 사전 로드 (동적)
      ============================================ */
   async preloadMovies() {
     try {
-      // Phase 1 영화 ID 수집
-      const phase1Ids = PHASE1_ROUNDS.flatMap(r => [r.movieA.id, r.movieB.id]);
+      console.log('Phase 1 영화 동적 로딩 시작...');
 
-      // 검증 풀 영화 ID 수집
-      const verificationIds = Object.values(VERIFICATION_POOL).flat();
+      // Phase 1 라운드별 영화 선택
+      for (let i = 0; i < PHASE1_ROUND_TEMPLATES.length; i++) {
+        const template = PHASE1_ROUND_TEMPLATES[i];
 
-      // 중복 제거
-      const allIds = [...new Set([...phase1Ids, ...verificationIds])];
+        try {
+          // movieA 가져오기
+          let movieA = await this.fetchMovieByTemplate(template.movieA);
+          if (movieA) {
+            this.moviesCache[movieA.id] = movieA;
+          }
 
-      console.log(`총 ${allIds.length}개 영화 정보 로딩 중...`);
+          // movieB 가져오기
+          let movieB = await this.fetchMovieByTemplate(template.movieB);
+          if (movieB) {
+            this.moviesCache[movieB.id] = movieB;
+          }
 
-      // 병렬 로드
-      const promises = allIds.map(id =>
-        window.tmdbApi.getMovieDetails(id)
-          .catch(err => {
-            console.error(`영화 ID ${id} 로드 실패:`, err);
-            return null;
-          })
-      );
-
-      const movies = await Promise.all(promises);
-
-      // 캐시 저장
-      movies.forEach(movie => {
-        if (movie) {
-          this.moviesCache[movie.id] = movie;
+          // 라운드별로 저장 (양쪽 다 성공한 경우만)
+          if (movieA && movieB) {
+            this.roundMovies.push({
+              movieA,
+              movieB,
+              template
+            });
+            console.log(`${template.theme} 영화 로드 완료: ${movieA.title} vs ${movieB.title}`);
+          } else {
+            console.warn(`${template.theme} 영화 로드 실패: A=${movieA?.title || '없음'}, B=${movieB?.title || '없음'}`);
+          }
+        } catch (error) {
+          console.error(`라운드 영화 로드 실패 (${template.theme}):`, error);
         }
-      });
+      }
 
-      console.log(`${Object.keys(this.moviesCache).length}개 영화 로드 완료`);
+      console.log(`Phase 1 영화 ${Object.keys(this.moviesCache).length}개 로드 완료`);
+
+      // totalRounds 조정 (로드된 라운드 + Phase 2 3라운드)
+      this.totalRounds = this.roundMovies.length + 3;
+      console.log(`총 ${this.totalRounds}라운드로 조정 (Phase1: ${this.roundMovies.length}, Phase2: 3)`);
 
     } catch (error) {
       console.error('영화 데이터 로드 실패:', error);
@@ -199,42 +390,61 @@ export class VSGameEngine {
   /* ============================================
      현재 라운드 데이터 반환
      ============================================ */
-  getCurrentRound() {
+  async getCurrentRound() {
     // Phase 1 (1-10)
-    if (this.currentRound < 10) {
-      const roundConfig = PHASE1_ROUNDS[this.currentRound];
-      const movieAData = this.moviesCache[roundConfig.movieA.id];
-      const movieBData = this.moviesCache[roundConfig.movieB.id];
+    if (this.currentRound < this.roundMovies.length) {
+      const roundData = this.roundMovies[this.currentRound];
 
-      if (!movieAData || !movieBData) {
-        console.error('영화 데이터 없음:', roundConfig);
+      if (!roundData) {
+        console.error(`라운드 ${this.currentRound} 데이터 없음`);
         return null;
       }
+
+      const { movieA, movieB, template } = roundData;
+
+      // 동적 roundConfig 생성
+      const roundConfig = {
+        ...template,
+        movieA: {
+          id: movieA.id,
+          attribute: template.movieA.attribute
+        },
+        movieB: {
+          id: movieB.id,
+          attribute: template.movieB.attribute
+        }
+      };
 
       return {
         phase: 1,
         roundConfig,
-        movieAData,
-        movieBData,
+        movieAData: movieA,
+        movieBData: movieB,
         progress: {
           current: this.currentRound + 1,
           total: this.totalRounds,
           percentage: ((this.currentRound + 1) / this.totalRounds) * 100
         },
-        theme: roundConfig.theme,
-        description: roundConfig.description
+        theme: template.theme,
+        description: template.description
       };
     }
 
-    // Phase 2 (11-15)
-    else if (this.currentRound < 15) {
+    // Phase 2
+    else if (this.currentRound < this.totalRounds) {
       // Phase 2 첫 라운드면 검증 라운드 생성
       if (this.phase2Rounds.length === 0) {
-        this.generatePhase2Rounds();
+        await this.generatePhase2Rounds();
       }
 
-      const phase2Index = this.currentRound - 10;
+      const phase2Index = this.currentRound - this.roundMovies.length;
       const roundConfig = this.phase2Rounds[phase2Index];
+
+      if (!roundConfig) {
+        console.error('Phase 2 라운드 없음:', phase2Index);
+        return null;
+      }
+
       const movieAData = this.moviesCache[roundConfig.movieA.id];
       const movieBData = this.moviesCache[roundConfig.movieB.id];
 
@@ -260,7 +470,7 @@ export class VSGameEngine {
   /* ============================================
      Phase 2 검증 라운드 동적 생성
      ============================================ */
-  generatePhase2Rounds() {
+  async generatePhase2Rounds() {
     console.log('Phase 2 검증 라운드 생성 시작...');
 
     // Phase 1 결과 분석
@@ -279,115 +489,105 @@ export class VSGameEngine {
     const worldviewWinner = this.phase1Results.worldview;
     const worldviewLoser = worldviewWinner === 'reality' ? 'fantasy' : 'reality';
 
-    this.phase2Rounds.push({
-      type: 'extreme',
-      layer: 'worldview',
-      theme: '절대 포기할 수 없는 것은?',
-      description: '당신의 최애 세계관을 확인합니다',
-      movieA: {
-        id: this.pickRandom(VERIFICATION_POOL[`${worldviewWinner}_extreme`]),
-        attribute: worldviewWinner,
-        expected: true  // 이걸 선택해야 신뢰도 UP
-      },
-      movieB: {
-        id: this.pickRandom(VERIFICATION_POOL[`${worldviewLoser}_extreme`]),
-        attribute: worldviewLoser,
-        expected: false
+    try {
+      const movieA = await this.fetchMovieByTemplate(VERIFICATION_TEMPLATES[`${worldviewWinner}_extreme`]);
+      const movieB = await this.fetchMovieByTemplate(VERIFICATION_TEMPLATES[`${worldviewLoser}_extreme`]);
+
+      if (movieA && movieB) {
+        this.moviesCache[movieA.id] = movieA;
+        this.moviesCache[movieB.id] = movieB;
+
+        this.phase2Rounds.push({
+          type: 'extreme',
+          layer: 'worldview',
+          theme: '절대 포기할 수 없는 것은?',
+          description: '당신의 최애 세계관을 확인합니다',
+          movieA: {
+            id: movieA.id,
+            attribute: worldviewWinner,
+            expected: true
+          },
+          movieB: {
+            id: movieB.id,
+            attribute: worldviewLoser,
+            expected: false
+          }
+        });
       }
-    });
+    } catch (error) {
+      console.error('Phase 2 라운드 1 생성 실패:', error);
+    }
 
     // 검증 질문 2: 시각 vs 청각
-    this.phase2Rounds.push({
-      type: 'detail',
-      layer: 'texture',
-      theme: '스토리가 엉망이어도 용서되는 건?',
-      description: '시각 vs 청각, 어느 쪽을 더 중시하나요?',
-      movieA: {
-        id: this.pickRandom(VERIFICATION_POOL.visual),
-        attribute: 'visual'
-      },
-      movieB: {
-        id: this.pickRandom(VERIFICATION_POOL.audio),
-        attribute: 'audio'
+    try {
+      const visualMovie = await this.fetchMovieByTemplate(VERIFICATION_TEMPLATES.visual);
+      const audioMovie = await this.fetchMovieByTemplate(VERIFICATION_TEMPLATES.audio);
+
+      if (visualMovie && audioMovie) {
+        this.moviesCache[visualMovie.id] = visualMovie;
+        this.moviesCache[audioMovie.id] = audioMovie;
+
+        this.phase2Rounds.push({
+          type: 'detail',
+          layer: 'texture',
+          theme: '스토리가 엉망이어도 용서되는 건?',
+          description: '시각 vs 청각, 어느 쪽을 더 중시하나요?',
+          movieA: {
+            id: visualMovie.id,
+            attribute: 'visual'
+          },
+          movieB: {
+            id: audioMovie.id,
+            attribute: 'audio'
+          }
+        });
       }
-    });
+    } catch (error) {
+      console.error('Phase 2 라운드 2 생성 실패:', error);
+    }
 
     // 검증 질문 3: 자극 타겟 교차 검증
     const stimTop = this.phase1Results.stimulation;
     const stimOpposite = stimTop === 'brain' ? 'body' : (stimTop === 'body' ? 'heart' : 'brain');
 
-    this.phase2Rounds.push({
-      type: 'crosscheck',
-      layer: 'stimulation',
-      theme: '진짜 원하는 자극은?',
-      description: '당신의 자극 타겟을 재확인합니다',
-      movieA: {
-        id: this.pickRandom(VERIFICATION_POOL[`${stimTop}_high`]),
-        attribute: stimTop,
-        expected: true
-      },
-      movieB: {
-        id: this.pickRandom(VERIFICATION_POOL[`${stimOpposite}_high`]),
-        attribute: stimOpposite,
-        expected: false
+    try {
+      const stimTopMovie = await this.fetchMovieByTemplate(VERIFICATION_TEMPLATES[`${stimTop}_high`]);
+      const stimOppMovie = await this.fetchMovieByTemplate(VERIFICATION_TEMPLATES[`${stimOpposite}_high`]);
+
+      if (stimTopMovie && stimOppMovie) {
+        this.moviesCache[stimTopMovie.id] = stimTopMovie;
+        this.moviesCache[stimOppMovie.id] = stimOppMovie;
+
+        this.phase2Rounds.push({
+          type: 'crosscheck',
+          layer: 'stimulation',
+          theme: '진짜 원하는 자극은?',
+          description: '당신의 자극 타겟을 재확인합니다',
+          movieA: {
+            id: stimTopMovie.id,
+            attribute: stimTop,
+            expected: true
+          },
+          movieB: {
+            id: stimOppMovie.id,
+            attribute: stimOpposite,
+            expected: false
+          }
+        });
       }
-    });
-
-    // 검증 질문 4: 온도 함정 질문
-    const tempPreference = this.phase1Results.texture.temperature;
-
-    // 따뜻함 선호자에게 차가운 명작 vs 따뜻한 B급 제시
-    if (tempPreference === 'warm') {
-      this.phase2Rounds.push({
-        type: 'trap',
-        layer: 'texture',
-        theme: '명작이지만 차가운 vs 평범하지만 따뜻한',
-        description: '온도 vs 완성도, 무엇을 택하나요?',
-        movieA: { id: 769, attribute: 'cold', expected: false },  // 좋은 친구들 (명작/차가움)
-        movieB: { id: 862, attribute: 'warm', expected: true }    // 토이 스토리 (따뜻함)
-      });
-    } else {
-      this.phase2Rounds.push({
-        type: 'trap',
-        layer: 'texture',
-        theme: '명작이지만 따뜻한 vs 평범하지만 차가운',
-        description: '온도 vs 완성도, 무엇을 택하나요?',
-        movieA: { id: 238, attribute: 'warm', expected: false }, // 대부 (명작/따뜻함)
-        movieB: { id: 346, attribute: 'cold', expected: true }   // 세븐 (차가움)
-      });
+    } catch (error) {
+      console.error('Phase 2 라운드 3 생성 실패:', error);
     }
 
-    // 검증 질문 5: 밀도 함정 질문
-    const densityPreference = this.phase1Results.texture.density;
-
-    if (densityPreference === 'light') {
-      this.phase2Rounds.push({
-        type: 'trap',
-        layer: 'texture',
-        theme: '무거운 명작 vs 가벼운 즐거움',
-        description: '완성도 vs 편안함, 무엇을 택하나요?',
-        movieA: { id: 424, attribute: 'heavy', expected: false }, // 쉰들러 리스트 (무거움)
-        movieB: { id: 293660, attribute: 'light', expected: true } // 데드풀 (가벼움)
-      });
-    } else {
-      this.phase2Rounds.push({
-        type: 'trap',
-        layer: 'texture',
-        theme: '가벼운 오락 vs 무거운 감동',
-        description: '오락성 vs 의미, 무엇을 택하나요?',
-        movieA: { id: 102899, attribute: 'light', expected: false }, // 앤트맨 (가벼움)
-        movieB: { id: 680, attribute: 'heavy', expected: true }      // 펄프 픽션 (무거움)
-      });
-    }
-
-    console.log('Phase 2 라운드 생성 완료:', this.phase2Rounds);
+    // 검증 질문 4 & 5: 온도/밀도 함정 질문은 Phase 2의 복잡성 때문에 생략하고 3개 라운드로 축소
+    console.log('Phase 2 라운드 생성 완료 (3라운드):', this.phase2Rounds);
   }
 
   /* ============================================
      영화 선택 처리
      ============================================ */
-  selectMovie(choice) {
-    const roundData = this.getCurrentRound();
+  async selectMovie(choice) {
+    const roundData = await this.getCurrentRound();
     if (!roundData) return true;
 
     const { roundConfig, phase } = roundData;
@@ -587,48 +787,100 @@ export class VSGameEngine {
      ============================================ */
   async getRecommendations(page = 1) {
     const profile = this.getProfileAnalysis();
+    const genreScores = {};
 
-    // 장르 ID 매핑
+    // 1. 1단계 설문 장르 (가중치 50%)
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    if (userProfile.genres) {
+      userProfile.genres.forEach(genreId => {
+        genreScores[genreId] = (genreScores[genreId] || 0) + 5.0;
+      });
+    }
+
+    // 2. VS 게임 선택 영화 장르 (가중치 30%)
+    this.history.forEach(h => {
+      const round = this.roundMovies[h.round - 1];
+      if (!round) return;
+      const selected = h.choice === 'A' ? round.movieA : round.movieB;
+      if (selected?.genre_ids) {
+        selected.genre_ids.forEach(genreId => {
+          genreScores[genreId] = (genreScores[genreId] || 0) + 3.0;
+        });
+      }
+    });
+
+    // 3. 3-Layer 분석 (가중치 20%)
     const genreMapping = {
-      // 세계관
-      reality: [99, 36, 18, 80],      // 다큐멘터리, 역사, 드라마, 범죄
-      fantasy: [878, 14, 12, 16],      // SF, 판타지, 모험, 애니메이션
-
-      // 자극
-      brain: [9648, 53, 80],           // 미스터리, 스릴러, 범죄
-      heart: [10749, 18, 10751],       // 로맨스, 드라마, 가족
-      body: [28, 27, 12],              // 액션, 공포, 모험
-
-      // 텍스처
-      warm: [35, 10751, 16],           // 코미디, 가족, 애니메이션
-      cold: [53, 80, 9648],            // 스릴러, 범죄, 미스터리
-      light: [35, 10749],              // 코미디, 로맨스
-      heavy: [18, 36, 10752]           // 드라마, 역사, 전쟁
+      reality: [36, 18, 80],
+      fantasy: [878, 14, 12],
+      brain: [9648, 53, 80],
+      heart: [10749, 18, 10751],
+      body: [28, 27, 12],
+      warm: [35, 10751, 16],
+      cold: [53, 80, 9648],
+      light: [35, 28],
+      heavy: [18, 36]
     };
 
-    // 최종 장르 조합
-    const genres = [
+    [
       ...genreMapping[profile.worldview.attribute],
       ...genreMapping[profile.stimulation.attribute],
-      ...genreMapping[profile.texture.temperature.attribute].slice(0, 1),
-      ...genreMapping[profile.texture.density.attribute].slice(0, 1)
-    ];
+      ...genreMapping[profile.texture.temperature.attribute],
+      ...genreMapping[profile.texture.density.attribute]
+    ].forEach(genreId => {
+      genreScores[genreId] = (genreScores[genreId] || 0) + 2.0;
+    });
 
-    // 중복 제거
-    const uniqueGenres = [...new Set(genres)];
+    // 점수 기준 상위 5개 장르
+    const uniqueGenres = Object.entries(genreScores)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([id]) => parseInt(id));
 
     console.log('추천 장르:', uniqueGenres);
 
+    // VS 게임에서 이미 본 영화 ID 수집
+    const seenMovieIds = new Set();
+    this.roundMovies.forEach(round => {
+      if (round.movieA) seenMovieIds.add(round.movieA.id);
+      if (round.movieB) seenMovieIds.add(round.movieB.id);
+    });
+    this.phase2Rounds.forEach(round => {
+      const movieA = this.moviesCache[round.movieA.id];
+      const movieB = this.moviesCache[round.movieB.id];
+      if (movieA) seenMovieIds.add(movieA.id);
+      if (movieB) seenMovieIds.add(movieB.id);
+    });
+
+    console.log('제외할 영화 수:', seenMovieIds.size);
+
     try {
       const data = await window.tmdbApi.discoverMovies({
-        with_genres: uniqueGenres.slice(0, 3).join(','), // 최대 3개
+        with_genres: uniqueGenres.slice(0, 3).join(','),
         sort_by: 'vote_average.desc',
-        'vote_count.gte': 1000,
-        'vote_average.gte': 7.0,
+        'vote_count.gte': 5000,
+        'vote_average.gte': 7.5,
         page: page
       });
 
-      return data.results;
+      if (!data.results || data.results.length === 0) {
+        return [];
+      }
+
+      // VS 게임에서 본 영화 제외하고 중복 제거
+      const uniqueMovies = [];
+      const movieIds = new Set();
+
+      for (const movie of data.results) {
+        if (!seenMovieIds.has(movie.id) && !movieIds.has(movie.id)) {
+          movieIds.add(movie.id);
+          uniqueMovies.push(movie);
+        }
+      }
+
+      console.log(`추천 영화 ${uniqueMovies.length}개 로드 (${seenMovieIds.size}개 제외)`);
+
+      return uniqueMovies;
     } catch (error) {
       console.error('추천 영화 로드 실패:', error);
       return [];

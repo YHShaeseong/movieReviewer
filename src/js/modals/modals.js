@@ -122,13 +122,15 @@ function displayProfileData(profile) {
     mood: document.getElementById('profileMood'),
     dislikes: document.getElementById('profileDislikes'),
     exploration: document.getElementById('profileExploration'),
-    ratedMovies: document.getElementById('profileRatedMovies'),
     username: document.getElementById('profileUsername'),
     joinDate: document.getElementById('profileJoinDate'),
-    genreCount: document.getElementById('profileGenreCount'),
-    ratingCount: document.getElementById('profileRatingCount'),
-    avgRating: document.getElementById('profileAvgRating')
+    genreCount: document.getElementById('profileGenreCount')
   };
+
+  if (!containers.genres || !containers.mood || !containers.dislikes) {
+    console.error('프로필 컨테이너 요소를 찾을 수 없습니다.');
+    return;
+  }
 
   // 사용자 정보 표시 (Display user info)
   if (containers.username && currentUser) {
@@ -143,19 +145,6 @@ function displayProfileData(profile) {
   // 통계 표시 (Display statistics)
   if (containers.genreCount) {
     containers.genreCount.textContent = profile.genres?.length || 0;
-  }
-
-  const ratings = profile.ratings || [];
-  if (containers.ratingCount) {
-    containers.ratingCount.textContent = ratings.length;
-  }
-  if (containers.avgRating) {
-    if (ratings.length > 0) {
-      const avg = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
-      containers.avgRating.textContent = avg.toFixed(1);
-    } else {
-      containers.avgRating.textContent = '-';
-    }
   }
 
   // 선호 장르 (Favorite genres)
@@ -188,28 +177,6 @@ function displayProfileData(profile) {
   containers.dislikes.innerHTML = profile.dislikes?.length
     ? profile.dislikes.map(d => `<span class="tag">${getKoreanName('dislike', d)}</span>`).join('')
     : '<span class="profile-empty">피하고 싶은 장르 정보가 없습니다.</span>';
-
-  // 평가한 영화 (Rated movies) - 최대 8개, 4x2 그리드
-  if (containers.ratedMovies) {
-    const ratings = profile.ratings || [];
-    if (ratings.length > 0) {
-      const recentRatings = ratings.slice(-8).reverse();
-      containers.ratedMovies.innerHTML = recentRatings.map(r => `
-        <div class="profile-movie-card" onclick="window.openMovieDetailModal(${r.movieId || 0})">
-          <img class="profile-movie-poster"
-               src="https://image.tmdb.org/t/p/w342${r.poster_path || ''}"
-               alt="${r.title}"
-               onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
-          <div class="profile-movie-info">
-            <div class="profile-movie-title">${r.title}</div>
-            <div class="profile-movie-rating">${r.rating.toFixed(1)}</div>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      containers.ratedMovies.innerHTML = '<span class="profile-empty">아직 평가한 영화가 없습니다.</span>';
-    }
-  }
 }
 
 /**
@@ -228,12 +195,6 @@ function displayEmptyProfile() {
   const genresEl = document.getElementById('profileGenres');
   if (genresEl) {
     genresEl.innerHTML = '<span class="profile-empty">선호 장르 정보가 없습니다.</span>';
-  }
-
-  // 평가한 영화 (Rated movies)
-  const ratedMoviesEl = document.getElementById('profileRatedMovies');
-  if (ratedMoviesEl) {
-    ratedMoviesEl.innerHTML = '<span class="profile-empty">아직 평가한 영화가 없습니다.</span>';
   }
 }
 
@@ -349,12 +310,8 @@ function renderMovieDetail(movie, trailer, watchProviders = null) {
     ? window.tmdbApi.getImageUrl(movie.poster_path, 'w500')
     : 'https://via.placeholder.com/500x750?text=No+Image';
 
-  // 평점 별 계산 제거됨 (Star rating calculation removed)
-  // 러닝타임 포맷 제거됨 (Runtime format removed)
-
-  // 출연진, 리뷰, 비슷한 영화 (Cast, reviews, similar movies)
+  // 출연진, 비슷한 영화 (Cast, similar movies)
   const cast = movie.credits?.cast?.slice(0, 8) || [];
-  const reviews = movie.reviews?.results?.slice(0, 3) || [];
   const similarMovies = movie.similar?.results?.slice(0, 6) || [];
 
   content.innerHTML = `
@@ -422,36 +379,6 @@ function renderMovieDetail(movie, trailer, watchProviders = null) {
     </div>
     ` : ''}
 
-    <!-- 리뷰 (Reviews) -->
-    <div class="movie-detail-section">
-      <h3>💬 평점 및 리뷰</h3>
-      ${reviews.length > 0 ? `
-      <div class="reviews-list">
-        ${reviews.map(review => {
-          const rating = review.author_details?.rating;
-          const date = review.created_at ? new Date(review.created_at).toLocaleDateString('ko-KR') : '';
-          const initial = review.author?.charAt(0).toUpperCase() || '?';
-          return `
-            <div class="review-item">
-              <div class="review-header">
-                <div class="review-author">
-                  <div class="review-avatar">${initial}</div>
-                  <div>
-                    <div class="review-author-name">${review.author}</div>
-                    <div class="review-date">${date}</div>
-                  </div>
-                </div>
-                ${rating ? `<span class="review-rating">★ ${rating.toFixed(1)}</span>` : ''}
-              </div>
-              <div class="review-content truncated">${review.content}</div>
-              <button class="review-toggle" onclick="window.toggleReview(this)">더보기</button>
-            </div>
-          `;
-        }).join('')}
-      </div>
-      ` : `<p class="no-reviews">아직 등록된 리뷰가 없습니다.</p>`}
-    </div>
-
     <!-- 비슷한 영화 (Similar movies) -->
     ${similarMovies.length > 0 ? `
     <div class="movie-detail-section">
@@ -472,20 +399,6 @@ function renderMovieDetail(movie, trailer, watchProviders = null) {
   `;
 }
 
-/**
- * 리뷰 더보기/접기 토글
- * @param {HTMLElement} btn - 토글 버튼 요소
- */
-export function toggleReview(btn) {
-  const content = btn.previousElementSibling;
-  if (content.classList.contains('truncated')) {
-    content.classList.remove('truncated');
-    btn.textContent = '접기';
-  } else {
-    content.classList.add('truncated');
-    btn.textContent = '더보기';
-  }
-}
 
 /* ============================================
    스트리밍 서비스 모달 (Streaming Providers Modal)
@@ -598,7 +511,7 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
       modal.onclick = (e) => e.target === modal && closeWatchProvidersModal();
     }
 
-    // 제공자 목록 렌더링 (Render providers list)
+    // 제공자 목록 렌더링 (Render providers list) - 클릭 시 선택 후 이동
     const listContainer = document.getElementById('watchProvidersList');
     listContainer.innerHTML = uniqueProviders.map(provider => {
       const streamingInfo = STREAMING_URLS[provider.provider_id];
@@ -608,7 +521,7 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
         : krProviders.link;
 
       return `
-        <a href="${searchUrl}" target="_blank" class="watch-provider-item">
+        <div class="watch-provider-item" onclick="window.selectWatchProvider('${searchUrl.replace(/'/g, "\\'")}', '${provider.provider_name.replace(/'/g, "\\'")}')">
           <img src="${window.tmdbApi.getImageUrl(provider.logo_path, 'w92')}"
                alt="${provider.provider_name}"
                onerror="this.src='https://via.placeholder.com/45x45?text=?'">
@@ -616,7 +529,8 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
             <span class="watch-provider-name">${provider.provider_name}</span>
             <span class="watch-provider-type">${provider.type}</span>
           </div>
-        </a>
+          <div class="watch-provider-arrow">→</div>
+        </div>
       `;
     }).join('');
 
@@ -625,6 +539,17 @@ export async function openWatchProvidersModal(movieId, encodedTitle) {
     console.error('스트리밍 정보 로딩 실패:', error);
     alert('스트리밍 정보를 불러올 수 없습니다.');
   }
+}
+
+/**
+ * 스트리밍 서비스 선택 및 이동
+ */
+export function selectWatchProvider(url, providerName) {
+  // 선택한 서비스로 새 창 열기
+  window.open(url, '_blank');
+
+  // 모달 닫기
+  closeWatchProvidersModal();
 }
 
 /**

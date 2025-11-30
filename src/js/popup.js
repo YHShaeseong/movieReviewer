@@ -11,6 +11,8 @@ import { GENRE_MAP, DISLIKE_MAPPING } from './config/constants.js';
 import { getKoreanName } from './utils/utils.js';
 import { VSGameEngine } from './vs-game/vsGameEngine.js';
 
+window.GENRE_MAP = GENRE_MAP;
+
 /* ============================================
    사용자 프로필 객체 (User Profile Object)
    ============================================ */
@@ -268,8 +270,7 @@ async function loadSecondPopupMovies() {
     await vsEngine.preloadMovies();
     hideLoadingMessage(loadingMessage);
 
-    console.log('VS 게임 준비 완료!');
-    renderVSRound();
+    await renderVSRound();
   } catch (error) {
     console.error('VS 게임 로드 실패:', error);
     alert('영화 정보를 불러오는데 실패했습니다. 다시 시도해주세요.');
@@ -280,9 +281,9 @@ async function loadSecondPopupMovies() {
  * VS 라운드 렌더링
  * Render VS round with 3-Layer analysis
  */
-function renderVSRound() {
+async function renderVSRound() {
   const ratingGrid = document.getElementById('movieRatingGrid');
-  const roundData = vsEngine.getCurrentRound();
+  const roundData = await vsEngine.getCurrentRound();
 
   if (!roundData) {
     console.error('라운드 데이터 없음');
@@ -349,7 +350,7 @@ function renderVSRound() {
  * VS 선택 처리
  * Handle VS selection with 3-Layer analysis
  */
-function handleVSSelection(e) {
+async function handleVSSelection(e) {
   const card = e.target.closest('.vs-movie-card');
   const choice = card.dataset.choice;
 
@@ -358,18 +359,18 @@ function handleVSSelection(e) {
 
   // VS 엔진에 선택 전달
   const currentRoundNum = vsEngine.currentRound;
-  const isGameComplete = vsEngine.selectMovie(choice);
+  const isGameComplete = await vsEngine.selectMovie(choice);
 
-  setTimeout(() => {
+  setTimeout(async () => {
     if (isGameComplete) {
       // 게임 완료 - 결과 화면으로
-      finishVSGame();
-    } else if (currentRoundNum === 10) {
+      await finishVSGame();
+    } else if (vsEngine.currentRound === vsEngine.roundMovies.length) {
       // Phase 1 완료 → Phase 2 진입 메시지 표시
-      showPhase2Transition();
+      await showPhase2Transition();
     } else {
       // 다음 라운드
-      renderVSRound();
+      await renderVSRound();
     }
   }, 500);
 }
@@ -378,7 +379,7 @@ function handleVSSelection(e) {
  * Phase 2 진입 전환 메시지 표시
  * Show Phase 1→2 transition message with visual changes
  */
-function showPhase2Transition() {
+async function showPhase2Transition() {
   const ratingGrid = document.getElementById('movieRatingGrid');
 
   // Phase 2 진입 메시지 표시
@@ -387,7 +388,7 @@ function showPhase2Transition() {
       <div class="phase2-message">
         <div class="phase2-icon">✨</div>
         <h3 class="phase2-title">취향 분석 완료!</h3>
-        <p class="phase2-subtitle">정밀도를 높이기 위해 마지막 5가지를 확인합니다.</p>
+        <p class="phase2-subtitle">정밀도를 높이기 위해 마지막 3가지를 확인합니다.</p>
         <div class="phase2-loading">
           <div class="loading-spinner"></div>
         </div>
@@ -396,8 +397,8 @@ function showPhase2Transition() {
   `;
 
   // 2초 후 Phase 2 시작
-  setTimeout(() => {
-    renderVSRound();
+  setTimeout(async () => {
+    await renderVSRound();
   }, 2000);
 }
 
@@ -506,30 +507,51 @@ async function showResultPopup() {
       </div>
     `;
 
-    // VS 게임 결과 기반 추천 영화 가져오기
-    const loadingMessage = showLoadingMessage('맞춤 추천 영화를 찾는 중...');
-    const recommendations = await vsEngine.getRecommendations(1);
-    hideLoadingMessage(loadingMessage);
+    // 영화 목록 영역에 로딩 표시
+    const moviesList = document.getElementById('recommendedMoviesList');
+    moviesList.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);"><div class="loading-spinner"></div><p style="margin-top: 15px;">맞춤 영화를 찾는 중...</p></div>';
 
-    // 추천 영화 5개 저장 (메인 페이지에서 사용)
-    const top5Movies = recommendations.slice(0, 5);
+    // VS 게임 결과 기반 추천 영화 가져오기
+    let recommendations = await vsEngine.getRecommendations(1);
+
+    // 4개 미만이면 추가 페이지 요청
+    if (recommendations.length < 4) {
+      const page2 = await vsEngine.getRecommendations(2);
+      recommendations = [...recommendations, ...page2];
+    }
+
+    // 중복 제거 후 최소 4개 확보
+    const uniqueMovies = [];
+    const seenIds = new Set();
+    for (const movie of recommendations) {
+      if (!seenIds.has(movie.id)) {
+        seenIds.add(movie.id);
+        uniqueMovies.push(movie);
+        if (uniqueMovies.length >= 5) break;
+      }
+    }
+
+    const top5Movies = uniqueMovies.slice(0, 5);
     userProfile.recommendedMovies = top5Movies;
 
     // 추천 영화 표시
-    const moviesList = document.getElementById('recommendedMoviesList');
     moviesList.innerHTML = '';
 
-    if (top5Movies.length === 0) {
-      moviesList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">추천 영화를 찾을 수 없습니다.</p>';
+    if (top5Movies.length < 4) {
+      moviesList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">충분한 추천 영화를 찾을 수 없습니다.</p>';
     } else {
       top5Movies.forEach(movie => {
         const movieCard = document.createElement('div');
         movieCard.className = 'result-movie-card';
+
+        const genres = movie.genre_ids?.slice(0, 3).map(id => window.GENRE_MAP?.[id] || '').filter(Boolean).join(', ') || '';
+
         movieCard.innerHTML = `
           <img src="${movie.poster_path ? window.tmdbApi.getImageUrl(movie.poster_path, 'w500') : 'https://via.placeholder.com/200x300'}" alt="${movie.title}">
           <div class="result-movie-info">
             <div class="result-movie-title">${movie.title}</div>
             <div class="result-movie-rating">★ ${movie.vote_average.toFixed(1)}</div>
+            ${genres ? `<div class="result-movie-genres">${genres}</div>` : ''}
           </div>
         `;
         moviesList.appendChild(movieCard);
