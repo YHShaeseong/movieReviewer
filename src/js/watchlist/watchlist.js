@@ -70,13 +70,18 @@ export function toggleWatchlist(movie, event) {
       return;
     }
 
+    // 이미지 URL 생성 (poster_path가 있으면 TMDB URL로 변환, 없으면 image 속성 사용)
+    const imageUrl = movie.image || (movie.poster_path
+      ? window.tmdbApi.getImageUrl(movie.poster_path, 'w342')
+      : '');
+
     // 워치리스트에 추가 (Add to watchlist)
     watchlist.push({
       id: movie.id,
       title: movie.title,
-      image: movie.image,
-      rating: movie.rating,
-      year: movie.year,
+      image: imageUrl,
+      rating: movie.rating || movie.vote_average?.toFixed(1) || 'N/A',
+      year: movie.year || movie.release_date?.split('-')[0] || 'N/A',
       addedAt: new Date().toISOString()
     });
     alert(`"${movie.title}"이(가) 워치리스트에 추가되었습니다.`);

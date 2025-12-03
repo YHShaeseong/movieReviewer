@@ -423,83 +423,59 @@ function finishVSGame() {
    ============================================ */
 
 /**
- * 결과 팝업 표시 (3-Layer 분석 결과 포함)
- * Show result popup with 3-Layer analysis
+ * 결과 팝업 표시 (RPG 스탯창 스타일 대시보드)
+ * Show result popup with RPG-style dashboard
  */
 async function showResultPopup() {
   try {
-    // 프로필 요약 표시 (Display 3-Layer profile summary)
+    // 프로필 요약 표시 (MBTI 스타일 텍스트 기반)
     const profileSummary = document.getElementById('userProfileSummary');
     const vsProfile = userProfile.vsProfile;
 
     profileSummary.innerHTML = `
       <div class="profile-summary">
-        <h4>🎬 당신의 영화 취향 DNA</h4>
+        <!-- 메인 타이틀 -->
+        <h1 class="profile-title">${vsProfile.title}</h1>
 
-        <div class="profile-layer">
-          <div class="layer-header">
-            <span class="layer-icon">🌍</span>
-            <span class="layer-title">세계관 선호도</span>
-          </div>
-          <div class="layer-result">
-            <strong>${vsProfile.worldview.label}</strong>
-            <span class="intensity-badge">${vsProfile.worldview.intensity} 선호</span>
-          </div>
-          <p class="layer-description">${vsProfile.worldview.description}</p>
+        <!-- 한 문장 요약 -->
+        <p class="profile-sentence">${vsProfile.sentence}</p>
+
+        <!-- 해시태그 -->
+        <div class="profile-hashtags">
+          ${vsProfile.hashtags.map(tag => `<span class="hashtag">${tag}</span>`).join('')}
         </div>
 
-        <div class="profile-layer">
-          <div class="layer-header">
-            <span class="layer-icon">⚡</span>
-            <span class="layer-title">자극 타겟</span>
-          </div>
-          <div class="layer-result">
-            <strong>${vsProfile.stimulation.label}</strong>
-            <span class="intensity-badge">${vsProfile.stimulation.intensity} 선호</span>
-          </div>
-          <p class="layer-description">${vsProfile.stimulation.description}</p>
-          <div class="stimulation-bar">
-            <div class="stim-item">
-              <span>🧠 Brain</span>
-              <div class="progress-mini">
-                <div class="fill" style="width: ${vsProfile.stimulation.distribution.brain}%"></div>
-              </div>
-              <span>${vsProfile.stimulation.distribution.brain}%</span>
+        <!-- 3-Layer 상세 정보 -->
+        <div class="profile-details">
+          <div class="detail-card">
+            <div class="detail-icon">🌍</div>
+            <div class="detail-content">
+              <h3 class="detail-title">세계관 선호도</h3>
+              <p class="detail-value">${vsProfile.worldview.label} (${vsProfile.worldview.intensity})</p>
+              <p class="detail-description">${vsProfile.worldview.description}</p>
             </div>
-            <div class="stim-item">
-              <span>❤️ Heart</span>
-              <div class="progress-mini">
-                <div class="fill" style="width: ${vsProfile.stimulation.distribution.heart}%"></div>
-              </div>
-              <span>${vsProfile.stimulation.distribution.heart}%</span>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-icon">⚡</div>
+            <div class="detail-content">
+              <h3 class="detail-title">자극 타겟</h3>
+              <p class="detail-value">${vsProfile.stimulation.label} (${vsProfile.stimulation.intensity})</p>
+              <p class="detail-description">${vsProfile.stimulation.description}</p>
             </div>
-            <div class="stim-item">
-              <span>💪 Body</span>
-              <div class="progress-mini">
-                <div class="fill" style="width: ${vsProfile.stimulation.distribution.body}%"></div>
-              </div>
-              <span>${vsProfile.stimulation.distribution.body}%</span>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-icon">🎨</div>
+            <div class="detail-content">
+              <h3 class="detail-title">감성 텍스처</h3>
+              <p class="detail-value">${vsProfile.texture.temperature.label} · ${vsProfile.texture.density.label}</p>
+              <p class="detail-description">${vsProfile.texture.temperature.label === '따뜻함' ? '감정의 온기를 중시하며' : '냉철한 분위기를 선호하며'}, ${vsProfile.texture.density.label === '가벼움' ? '경쾌한 전개를 좋아합니다' : '깊이 있는 서사를 추구합니다'}</p>
             </div>
           </div>
         </div>
 
-        <div class="profile-layer">
-          <div class="layer-header">
-            <span class="layer-icon">🎨</span>
-            <span class="layer-title">감성 텍스처</span>
-          </div>
-          <div class="layer-split">
-            <div class="texture-item">
-              <strong>온도:</strong> ${vsProfile.texture.temperature.label}
-              <span class="intensity-badge">${vsProfile.texture.temperature.intensity}</span>
-            </div>
-            <div class="texture-item">
-              <strong>밀도:</strong> ${vsProfile.texture.density.label}
-              <span class="intensity-badge">${vsProfile.texture.density.intensity}</span>
-            </div>
-          </div>
-        </div>
-
+        <!-- 기본 정보 -->
         <div class="profile-basic">
           <p><strong>선호 장르:</strong> ${userProfile.genres.map(id => GENRE_MAP[id]).join(', ')}</p>
           <p><strong>선호 무드:</strong> ${getMoodLabel(userProfile.mood)}</p>
@@ -511,34 +487,42 @@ async function showResultPopup() {
     const moviesList = document.getElementById('recommendedMoviesList');
     moviesList.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);"><div class="loading-spinner"></div><p style="margin-top: 15px;">맞춤 영화를 찾는 중...</p></div>';
 
-    // VS 게임 결과 기반 추천 영화 가져오기
+    // VS 게임 결과 기반 추천 영화 가져오기 (최소 5개 보장)
     let recommendations = await vsEngine.getRecommendations(1);
+    console.log('1페이지 추천:', recommendations.length);
 
-    // 4개 미만이면 추가 페이지 요청
-    if (recommendations.length < 4) {
-      const page2 = await vsEngine.getRecommendations(2);
-      recommendations = [...recommendations, ...page2];
+    // 5개 미만이면 추가 페이지 요청
+    let pageNum = 2;
+    while (recommendations.length < 5 && pageNum <= 5) {
+      const additionalMovies = await vsEngine.getRecommendations(pageNum);
+      console.log(`${pageNum}페이지 추가:`, additionalMovies.length);
+
+      if (additionalMovies.length === 0) break;
+
+      recommendations = [...recommendations, ...additionalMovies];
+      pageNum++;
     }
 
-    // 중복 제거 후 최소 4개 확보
+    // 중복 제거
     const uniqueMovies = [];
     const seenIds = new Set();
     for (const movie of recommendations) {
       if (!seenIds.has(movie.id)) {
         seenIds.add(movie.id);
         uniqueMovies.push(movie);
-        if (uniqueMovies.length >= 5) break;
       }
     }
 
     const top5Movies = uniqueMovies.slice(0, 5);
     userProfile.recommendedMovies = top5Movies;
 
+    console.log('최종 추천 영화:', top5Movies.length, '개');
+
     // 추천 영화 표시
     moviesList.innerHTML = '';
 
-    if (top5Movies.length < 4) {
-      moviesList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">충분한 추천 영화를 찾을 수 없습니다.</p>';
+    if (top5Movies.length === 0) {
+      moviesList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">추천 영화를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</p>';
     } else {
       top5Movies.forEach(movie => {
         const movieCard = document.createElement('div');

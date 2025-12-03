@@ -344,24 +344,3 @@ start chrome index.html
 
 ---
 
-## 개발 히스토리
-
-### 주요 업데이트
-- **feat**: 3-Layer 취향 분석 시스템 구현
-- **feat**: VS 게임 고정 영화 시스템 (동적 → 고정)
-- **feat**: 가중치 기반 추천 알고리즘 (50% + 30% + 20%)
-- **refactor**: 퍼센트 표시 대신 강도 표현으로 변경
-- **design**: 팝업 UI 개선 및 Phase 2 메시지 개선
-
----
-
-## 라이선스
-
-This project is for educational purposes only.
-
----
-
-## 참고 자료
-
-- [TMDB API Documentation](https://developers.themoviedb.org/3)
-- [JavaScript ES6+ Features](https://developer.mozilla.org/en-US/docs/Web/JavaScript)

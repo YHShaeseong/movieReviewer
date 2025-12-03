@@ -280,18 +280,31 @@ export async function loadDailyRecommendations() {
     // DocumentFragment로 성능 최적화 (Performance optimization with DocumentFragment)
     const fragment = document.createDocumentFragment();
     movieList.forEach(movie => {
+      const inWatchlist = isInWatchlist(movie.id);
       const card = document.createElement('div');
       card.className = 'daily-movie-card';
+      card.dataset.movieId = movie.id;
       card.style.cursor = 'pointer';
       card.innerHTML = `
+        <span class="rating-badge">★ ${movie.vote_average.toFixed(1)}</span>
         <img src="${window.tmdbApi.getImageUrl(movie.poster_path, 'w342')}" alt="${movie.title}">
         <div class="daily-movie-info">
           <div class="daily-movie-title">${movie.title}</div>
-          <div class="daily-movie-rating">★ ${movie.vote_average.toFixed(1)}</div>
+          <button class="watchlist-btn-icon ${inWatchlist ? 'active' : ''}"
+                  data-movie-id="${movie.id}"
+                  title="${inWatchlist ? '워치리스트에서 제거' : '워치리스트에 추가'}">
+            ${inWatchlist ? '🔖' : '🏷️'}
+          </button>
         </div>
       `;
+
       // 카드 클릭 시 상세 모달 열기 (Open detail modal on card click)
       card.onclick = () => openMovieDetailModal(movie.id);
+
+      // Watchlist 버튼 이벤트
+      const watchlistBtn = card.querySelector('.watchlist-btn-icon');
+      watchlistBtn.onclick = (e) => toggleWatchlist(movie, e);
+
       fragment.appendChild(card);
     });
 

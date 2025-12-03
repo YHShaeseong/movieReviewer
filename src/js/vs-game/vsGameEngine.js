@@ -6,6 +6,30 @@
    ============================================ */
 
 /* ============================================
+   TMDB 키워드 매핑 테이블
+   ============================================ */
+const KEYWORD_MAPPING = {
+  // Stimulation - 자극
+  stimulation: {
+    brain: [9663, 10183, 9824, 11005],  // investigation, psychological, mystery, suspense
+    heart: [6075, 4093, 10634, 9716],   // friendship, love, coming of age, healing
+    body: [9714, 156095, 10349]         // remake, survival, gore
+  },
+  // Atmosphere - 분위기 (Texture)
+  texture: {
+    warm: [10564, 9716],     // feel good, healing
+    cold: [10046, 11003, 9718, 236],  // dystopia, noir, revenge, suicide
+    light: [],               // Comedy, Adventure (장르로 처리)
+    heavy: []                // Drama, History, War (장르로 처리)
+  },
+  // Worldview - 세계관
+  worldview: {
+    reality: [387],          // biography
+    fantasy: [4388, 9866]    // spaceship, magic
+  }
+};
+
+/* ============================================
    Phase 1: 고정 영화 라운드 (10라운드)
    ============================================ */
 const PHASE1_FIXED_ROUNDS = [
@@ -18,14 +42,14 @@ const PHASE1_FIXED_ROUNDS = [
     movieA: { id: 278, attribute: 'reality' },      // 쇼생크 탈출
     movieB: { id: 157336, attribute: 'fantasy' }    // 인터스텔라
   },
-  // R2: 현실 범죄 vs SF
+  // R2: 극한 현실 vs 무한 상상
   {
     phase: 1,
     layer: 'worldview',
-    theme: '현실 범죄 vs SF',
+    theme: '극한 현실 vs 무한 상상',
     description: '사실 vs 상상, 어디에 더 빠지나요?',
-    movieA: { id: 238, attribute: 'reality' },      // 대부
-    movieB: { id: 27205, attribute: 'fantasy' }     // 인셉션
+    movieA: { id: 496243, attribute: 'reality' },   // 기생충
+    movieB: { id: 299534, attribute: 'fantasy' }    // 어벤져스: 엔드게임
   },
   // R3: 역사 vs 미래
   {
@@ -33,117 +57,76 @@ const PHASE1_FIXED_ROUNDS = [
     layer: 'worldview',
     theme: '역사 vs 미래',
     description: '과거 vs 미래, 어디로 가고 싶나요?',
-    movieA: { id: 424, attribute: 'reality' },      // 쉰들러 리스트
-    movieB: { id: 603, attribute: 'fantasy' }       // 매트릭스
+    movieA: { id: 597, attribute: 'reality' },      // 타이타닉
+    movieB: { id: 19995, attribute: 'fantasy' }     // 아바타
   },
 
-  // R4: 두뇌 vs 심장
+  // R4: 치열한 두뇌 vs 따뜻한 감동
   {
     phase: 1,
     layer: 'stimulation',
-    theme: '두뇌 vs 심장',
+    theme: '치열한 두뇌 vs 따뜻한 감동',
     description: '머리 vs 가슴, 무엇을 더 자극받고 싶나요?',
-    movieA: { id: 550, attribute: 'brain' },        // 파이트 클럽
-    movieB: { id: 13, attribute: 'heart' }          // 포레스트 검프
+    movieA: { id: 9693, attribute: 'brain' },       // 셜록 홈즈
+    movieB: { id: 1022789, attribute: 'heart' }     // 인사이드 아웃 2
   },
-  // R5: 스릴 vs 감동
+  // R5: 압도적 스릴 vs 몽글몽글 감성
   {
     phase: 1,
     layer: 'stimulation',
-    theme: '스릴 vs 감동',
+    theme: '압도적 스릴 vs 몽글몽글 감성',
     description: '긴장감 vs 눈물, 어떤 걸 원하나요?',
     movieA: { id: 155, attribute: 'body' },         // 다크 나이트
     movieB: { id: 129, attribute: 'heart' }         // 센과 치히로의 행방불명
   },
-  // R6: 액션 vs 로맨스
+  // R6: 짜릿한 액션 vs 달달한 로맨스
   {
     phase: 1,
     layer: 'stimulation',
-    theme: '액션 vs 로맨스',
+    theme: '짜릿한 액션 vs 달달한 로맨스',
     description: '몸 vs 마음, 어떤 자극을 원하나요?',
-    movieA: { id: 524434, attribute: 'body' },      // 덩케르크
-    movieB: { id: 19404, attribute: 'heart' }       // 어바웃 타임
+    movieA: { id: 361743, attribute: 'body' },      // 탑건: 매버릭
+    movieB: { id: 976573, attribute: 'heart' }      // 엘리멘탈
   },
+
   // R7: 진지함 vs 유쾌함
   {
     phase: 1,
-    layer: 'stimulation',
+    layer: 'texture',
     theme: '진지함 vs 유쾌함',
     description: '무거운 감동 vs 따뜻한 감동, 어떤 걸 원하나요?',
-    movieA: { id: 497, attribute: 'body' },         // 그린 마일
-    movieB: { id: 11216, attribute: 'heart' }       // 시네마 천국
+    movieA: { id: 872585, attribute: 'heavy' },     // 오펜하이머
+    movieB: { id: 346698, attribute: 'light' }      // 바비
   },
-
-  // R8: 따뜻함 vs 차가움
+  // R8: 따뜻한 위로 vs 차가운 전율
   {
     phase: 1,
     layer: 'texture',
-    theme: '따뜻함 vs 차가움',
+    theme: '따뜻한 위로 vs 차가운 전율',
     description: '어떤 온도의 영화가 좋나요?',
-    movieA: { id: 12477, attribute: 'warm' },       // 그래비티 폴즈
-    movieB: { id: 1124, attribute: 'cold' }         // 프레스티지
+    movieA: { id: 150540, attribute: 'warm' },      // 인사이드 아웃
+    movieB: { id: 475557, attribute: 'cold' }       // 조커
   },
-  // R9: 가벼움 vs 무거움
+  // R9: 가벼운 웃음 vs 묵직한 서사
   {
     phase: 1,
     layer: 'texture',
-    theme: '가벼움 vs 무거움',
+    theme: '가벼운 웃음 vs 묵직한 서사',
     description: '어떤 무게감의 이야기가 좋나요?',
-    movieA: { id: 920, attribute: 'light' },        // 카 (픽사)
-    movieB: { id: 378, attribute: 'heavy' }         // 라이언 일병 구하기
+    movieA: { id: 585511, attribute: 'light' },     // 극한직업
+    movieB: { id: 49026, attribute: 'heavy' }       // 다크 나이트 라이즈
   },
-  // R10: 밝음 vs 어두움
+  // R10: 밝은 동심 vs 어두운 복수
   {
     phase: 1,
     layer: 'texture',
-    theme: '밝음 vs 어두움',
+    theme: '밝은 동심 vs 어두운 복수',
     description: '어떤 분위기를 선호하나요?',
     movieA: { id: 862, attribute: 'light' },        // 토이 스토리
-    movieB: { id: 769, attribute: 'heavy' }         // 양들의 침묵
+    movieB: { id: 1500, attribute: 'cold' }         // 올드보이
   }
 ];
 
-/* ============================================
-   검증용 영화 템플릿 (Verification Templates)
-   ============================================ */
-const VERIFICATION_TEMPLATES = {
-  reality_extreme: {
-    genres: [18, 36],
-    minVotes: 10000,
-    minRating: 8.0,
-    keywords: [9715]  // true-story
-  },
-  fantasy_extreme: {
-    genres: [14, 878],
-    minVotes: 10000,
-    minRating: 8.0
-  },
-  visual: {
-    genres: [878, 28, 12],
-    minVotes: 8000,
-    minRating: 7.5
-  },
-  audio: {
-    genres: [10402, 18],  // 음악, 드라마
-    minVotes: 5000,
-    minRating: 7.5
-  },
-  brain_high: {
-    genres: [9648, 53],
-    minVotes: 8000,
-    minRating: 8.0
-  },
-  heart_high: {
-    genres: [10749, 18],
-    minVotes: 5000,
-    minRating: 7.8
-  },
-  body_high: {
-    genres: [28],
-    minVotes: 8000,
-    minRating: 7.5
-  }
-};
 
 /* ============================================
    VS 게임 엔진 클래스
@@ -331,7 +314,7 @@ export class VSGameEngine {
 
     // R11: 세계관 검증 (reality vs fantasy)
     const worldviewMovies = {
-      reality: { id: 598, title: '시티 오브 갓' },      // 현실파 극한
+      reality: { id: 550, title: '파이트 클럽' },      // 현실파 극한
       fantasy: { id: 122, title: '반지의 제왕: 두 개의 탑' }  // 판타지파 극한
     };
 
@@ -359,9 +342,9 @@ export class VSGameEngine {
 
     // R12: 자극 검증 (brain vs heart vs body)
     const stimMovies = {
-      brain: { id: 489, title: '살인의 추억' },
+      brain: { id: 680, title: '펄프 픽션' },
       heart: { id: 372058, title: '너의 이름은' },
-      body: { id: 99861, title: '어벤져스' }
+      body: { id: 299534, title: '어벤져스: 엔드게임' }
     };
 
     const stimWinner = this.phase1Results.stimulation;
@@ -388,8 +371,8 @@ export class VSGameEngine {
 
     // R13: 온도 검증 (warm vs cold)
     const tempMovies = {
-      warm: { id: 585511, title: '수퍼 소닉2' },
-      cold: { id: 539, title: '분노의 질주: 더 세븐' }
+      warm: { id: 354912, title: '코코' },
+      cold: { id: 27205, title: '인셉션' }
     };
 
     const tempWinner = this.phase1Results.texture.temperature;
@@ -596,7 +579,56 @@ export class VSGameEngine {
     const lightPercent = Math.round((finalScores.texture.light / lightHeavyTotal) * 100);
     const heavyPercent = 100 - lightPercent;
 
+    // MBTI 스타일 문장 생성 로직
+    const tempAttr = warmPercent > coldPercent ? 'warm' : 'cold';
+    const densAttr = lightPercent > heavyPercent ? 'light' : 'heavy';
+
+    // 분위기 형용사 (온도감)
+    const atmosphereAdj = {
+      'warm': '따뜻하고 희망찬',
+      'cold': '차갑고 냉철한'
+    };
+
+    // 세계관 명사
+    const worldviewNoun = {
+      'reality': '현실의 세계',
+      'fantasy': '상상의 세계'
+    };
+
+    // 자극 타겟 동사구
+    const stimulationVerb = {
+      'brain': '지적인 탐구를 즐기는',
+      'heart': '깊은 감동을 찾아 떠나는',
+      'body': '짜릿한 전율을 만끽하는'
+    };
+
+    // 페르소나 칭호 (6가지 조합)
+    const personaTitle = {
+      'reality_brain': '현실의 전략가',
+      'reality_heart': '감성적인 현실주의자',
+      'reality_body': '행동하는 실천가',
+      'fantasy_brain': '사색하는 몽상가',
+      'fantasy_heart': '낭만적인 감성가',
+      'fantasy_body': '꿈꾸는 모험가'
+    };
+
+    const title = personaTitle[`${worldviewResult.attribute}_${stimAttr}`];
+    const sentence = `당신은 ${atmosphereAdj[tempAttr]} ${worldviewNoun[worldviewResult.attribute]} 속에서 ${stimulationVerb[stimAttr]} ${title}입니다.`;
+
+    // 해시태그 생성 (3-5개)
+    const hashtags = [
+      `#${tempAttr === 'warm' ? '따뜻함' : '냉철함'}`,
+      `#${worldviewResult.attribute === 'reality' ? '현실주의' : '몽상가'}`,
+      `#${stimAttr === 'brain' ? '지적호기심' : stimAttr === 'heart' ? '감성충만' : '액션러버'}`
+    ];
+
+    if (densAttr === 'heavy') hashtags.push('#깊이있는');
+    if (worldviewResult.intensity === '매우 높음') hashtags.push('#확고한취향');
+
     return {
+      title: title,  // 페르소나 칭호
+      sentence: sentence,  // MBTI 스타일 한 문장 요약
+      hashtags: hashtags,  // 해시태그 배열
       worldview: worldviewResult,
       stimulation: {
         label: stimLabel,
@@ -613,18 +645,54 @@ export class VSGameEngine {
         temperature: {
           label: warmPercent > coldPercent ? '따뜻함' : '차가움',
           intensity: getIntensity(warmPercent > coldPercent ? warmPercent : coldPercent),
-          attribute: warmPercent > coldPercent ? 'warm' : 'cold'
+          attribute: warmPercent > coldPercent ? 'warm' : 'cold',
+          percent: warmPercent > coldPercent ? warmPercent : coldPercent,
+          warmPercent,
+          coldPercent
         },
         density: {
           label: lightPercent > heavyPercent ? '가벼움' : '무거움',
           intensity: getIntensity(lightPercent > heavyPercent ? lightPercent : heavyPercent),
-          attribute: lightPercent > heavyPercent ? 'light' : 'heavy'
+          attribute: lightPercent > heavyPercent ? 'light' : 'heavy',
+          percent: lightPercent > heavyPercent ? lightPercent : heavyPercent,
+          lightPercent,
+          heavyPercent
         }
       },
       confidence: this.confidence,
       rawScores: this.scores,
       finalScores: finalScores
     };
+  }
+
+  /* ============================================
+     키워드 ID 추출 (3-Layer 분석 기반)
+     ============================================ */
+  getKeywordIds() {
+    const profile = this.getProfileAnalysis();
+    const keywordIds = [];
+
+    // 1. Stimulation (자극 타겟)
+    const stimAttr = profile.stimulation.attribute; // 'brain', 'heart', 'body'
+    if (KEYWORD_MAPPING.stimulation[stimAttr]) {
+      keywordIds.push(...KEYWORD_MAPPING.stimulation[stimAttr]);
+    }
+
+    // 2. Texture (분위기) - temperature 기준
+    const tempAttr = profile.texture.temperature.attribute; // 'warm', 'cold'
+    if (KEYWORD_MAPPING.texture[tempAttr]) {
+      keywordIds.push(...KEYWORD_MAPPING.texture[tempAttr]);
+    }
+
+    // 3. Worldview (세계관)
+    const worldAttr = profile.worldview.attribute; // 'reality', 'fantasy'
+    if (KEYWORD_MAPPING.worldview[worldAttr]) {
+      keywordIds.push(...KEYWORD_MAPPING.worldview[worldAttr]);
+    }
+
+    // 중복 제거 후 파이프(|)로 연결 (OR 조건)
+    const uniqueIds = [...new Set(keywordIds)];
+    return uniqueIds.join('|');
   }
 
   /* ============================================
@@ -676,13 +744,26 @@ export class VSGameEngine {
       genreScores[genreId] = (genreScores[genreId] || 0) + 2.0;
     });
 
-    // 점수 기준 상위 5개 장르
+    // 4. 피하기 요소 반영 (음수 가중치 -3.0)
+    if (userProfile.dislikes && userProfile.dislikes.length > 0) {
+      userProfile.dislikes.forEach(genreId => {
+        genreScores[genreId] = (genreScores[genreId] || 0) - 3.0;
+      });
+    }
+
+    // 점수 기준 상위 5개 장르 (음수 점수 제외)
     const uniqueGenres = Object.entries(genreScores)
+      .filter(([id, score]) => score > 0)  // 음수 점수 제외
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([id]) => parseInt(id));
 
     console.log('추천 장르:', uniqueGenres);
+    console.log('피하기 장르:', userProfile.dislikes);
+
+    // 키워드 추출
+    const keywordString = this.getKeywordIds();
+    console.log('추천 키워드:', keywordString);
 
     // VS 게임에서 이미 본 영화 ID 수집
     const seenMovieIds = new Set();
@@ -699,36 +780,130 @@ export class VSGameEngine {
 
     console.log('제외할 영화 수:', seenMovieIds.size);
 
-    try {
-      const data = await window.tmdbApi.discoverMovies({
-        with_genres: uniqueGenres.slice(0, 3).join(','),
-        sort_by: 'vote_average.desc',
-        'vote_count.gte': 5000,
-        'vote_average.gte': 7.5,
-        page: page
-      });
+    // 추천 영화 가져오기 함수 (폴백 포함)
+    const fetchMoviesWithFallback = async (genreIds, voteCountMin, voteAvgMin, pageNum, withKeywords = true) => {
+      try {
+        const params = {
+          with_genres: genreIds.join(','),
+          sort_by: 'vote_average.desc',
+          'vote_count.gte': voteCountMin,
+          'vote_average.gte': voteAvgMin,
+          page: pageNum
+        };
 
-      if (!data.results || data.results.length === 0) {
+        // 키워드 필터 추가 (옵션)
+        if (withKeywords && keywordString) {
+          params.with_keywords = keywordString;
+        }
+
+        const data = await window.tmdbApi.discoverMovies(params);
+
+        if (!data.results) return [];
+
+        // VS 게임에서 본 영화 제외하고 중복 제거
+        const uniqueMovies = [];
+        const movieIds = new Set();
+
+        for (const movie of data.results) {
+          if (!seenMovieIds.has(movie.id) && !movieIds.has(movie.id)) {
+            movieIds.add(movie.id);
+            uniqueMovies.push(movie);
+          }
+        }
+
+        return uniqueMovies;
+      } catch (error) {
+        console.error('영화 로드 실패:', error);
         return [];
       }
+    };
 
-      // VS 게임에서 본 영화 제외하고 중복 제거
-      const uniqueMovies = [];
-      const movieIds = new Set();
+    try {
+      let movies = [];
 
-      for (const movie of data.results) {
-        if (!seenMovieIds.has(movie.id) && !movieIds.has(movie.id)) {
-          movieIds.add(movie.id);
-          uniqueMovies.push(movie);
-        }
+      // 1차 시도: 장르 + 키워드 (엄격한 기준)
+      if (uniqueGenres.length >= 3) {
+        movies = await fetchMoviesWithFallback(uniqueGenres.slice(0, 3), 5000, 7.5, page, true);
+        console.log(`1차 시도 (장르+키워드): ${movies.length}개 로드`);
       }
 
-      console.log(`추천 영화 ${uniqueMovies.length}개 로드 (${seenMovieIds.size}개 제외)`);
+      // 2차 시도: 장르만 (키워드 제거, 평점 완화)
+      if (movies.length < 5 && uniqueGenres.length >= 3) {
+        const additional = await fetchMoviesWithFallback(uniqueGenres.slice(0, 3), 3000, 7.0, page, false);
+        const existingIds = new Set(movies.map(m => m.id));
+        additional.forEach(movie => {
+          if (!existingIds.has(movie.id) && movies.length < 20) {
+            movies.push(movie);
+            existingIds.add(movie.id);
+          }
+        });
+        console.log(`2차 시도 (키워드 제거): 총 ${movies.length}개`);
+      }
 
-      return uniqueMovies;
+      // 3차 시도: 장르 확대 (상위 5개)
+      if (movies.length < 5 && uniqueGenres.length > 0) {
+        const additional = await fetchMoviesWithFallback(uniqueGenres.slice(0, 5), 3000, 7.0, page, false);
+        const existingIds = new Set(movies.map(m => m.id));
+        additional.forEach(movie => {
+          if (!existingIds.has(movie.id) && movies.length < 20) {
+            movies.push(movie);
+            existingIds.add(movie.id);
+          }
+        });
+        console.log(`3차 시도 (장르 확대): 총 ${movies.length}개`);
+      }
+
+      // 4차 시도: 기준 더 완화 (평점 6.5+)
+      if (movies.length < 5 && uniqueGenres.length > 0) {
+        const additional = await fetchMoviesWithFallback(uniqueGenres, 1000, 6.5, page, false);
+        const existingIds = new Set(movies.map(m => m.id));
+        additional.forEach(movie => {
+          if (!existingIds.has(movie.id) && movies.length < 20) {
+            movies.push(movie);
+            existingIds.add(movie.id);
+          }
+        });
+        console.log(`4차 시도 (기준 완화): 총 ${movies.length}개`);
+      }
+
+      // 5차 시도: 최종 폴백 - 인기 영화 (장르 제한 없음)
+      if (movies.length < 5) {
+        console.log('최종 폴백: 인기 영화로 채우기');
+        const fallbackData = await window.tmdbApi.discoverMovies({
+          sort_by: 'popularity.desc',
+          'vote_count.gte': 5000,
+          'vote_average.gte': 7.0,
+          page: page
+        });
+
+        if (fallbackData.results) {
+          const existingIds = new Set(movies.map(m => m.id));
+          fallbackData.results.forEach(movie => {
+            if (!seenMovieIds.has(movie.id) && !existingIds.has(movie.id) && movies.length < 20) {
+              movies.push(movie);
+              existingIds.add(movie.id);
+            }
+          });
+        }
+        console.log(`최종: 총 ${movies.length}개 (인기 영화 포함)`);
+      }
+
+      console.log(`✅ 최종 추천 영화 ${movies.length}개 반환`);
+      return movies;
+
     } catch (error) {
       console.error('추천 영화 로드 실패:', error);
-      return [];
+
+      // 최종 에러 폴백: 기본 인기 영화
+      try {
+        const fallbackData = await window.tmdbApi.discoverMovies({
+          sort_by: 'popularity.desc',
+          page: 1
+        });
+        return fallbackData.results?.slice(0, 20) || [];
+      } catch {
+        return [];
+      }
     }
   }
 

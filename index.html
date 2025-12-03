@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,11 @@
   <link rel="stylesheet" href="src/css/style.css">
   <link rel="stylesheet" href="src/css/profile-styles.css?v=2">
 </head>
+
 <body>
   <!-- ==================== 취향 확인 팝업 (iframe) ==================== -->
-  <iframe id="popupFrame" src="/src/pages/popup.html" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 10000;"></iframe>
+  <iframe id="popupFrame" src="/src/pages/popup.html"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 10000;"></iframe>
   <!-- ==================== 취향 확인 팝업 끝 ==================== -->
 
   <!-- 헤더: 로고, 검색, 메뉴 -->
@@ -38,7 +41,7 @@
   <!-- 로그인/회원가입 모달 -->
   <div id="authModal" class="modal" style="display: none;">
     <div class="modal-content">
-      <span class="modal-close">&times;</span>  
+      <span class="modal-close">&times;</span>
       <h2 id="authTitle">로그인</h2>
       <form id="authForm">
         <input type="text" id="authUsername" placeholder="아이디" required>
@@ -83,21 +86,11 @@
           <div class="profile-avatar-large">👤</div>
           <div class="profile-user-info">
             <h2 id="profileUsername">사용자</h2>
-            <p id="profileJoinDate" class="profile-join-date">가입일: -</p>
           </div>
         </div>
       </div>
 
       <div class="profile-content">
-        <!-- 통계 -->
-        <div class="profile-section">
-          <div class="profile-stats">
-            <div class="profile-stat-item">
-              <div class="profile-stat-value" id="profileGenreCount">0</div>
-              <div class="profile-stat-label">선호 장르</div>
-            </div>
-          </div>
-        </div>
 
         <!-- 선호 장르 -->
         <div class="profile-section">
@@ -121,6 +114,12 @@
         <div class="profile-section">
           <h3 class="profile-section-title">피하고 싶은 장르</h3>
           <div id="profileDislikes" class="profile-dislikes"></div>
+        </div>
+
+        <!-- VS 게임 취향 분석 결과 -->
+        <div class="profile-section" id="profileVsSection" style="display: none;">
+          <h3 class="profile-section-title">나의 영화 취향</h3>
+          <div id="profileVsResult" class="profile-vs-result"></div>
         </div>
 
       </div>
@@ -196,4 +195,5 @@
   <!-- 메인 스크립트 (ES6 모듈) - Main script (ES6 module) -->
   <script type="module" src="src/js/main.js"></script>
 </body>
+
 </html>

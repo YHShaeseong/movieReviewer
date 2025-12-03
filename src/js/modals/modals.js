@@ -122,9 +122,7 @@ function displayProfileData(profile) {
     mood: document.getElementById('profileMood'),
     dislikes: document.getElementById('profileDislikes'),
     exploration: document.getElementById('profileExploration'),
-    username: document.getElementById('profileUsername'),
-    joinDate: document.getElementById('profileJoinDate'),
-    genreCount: document.getElementById('profileGenreCount')
+    username: document.getElementById('profileUsername')
   };
 
   if (!containers.genres || !containers.mood || !containers.dislikes) {
@@ -135,16 +133,6 @@ function displayProfileData(profile) {
   // 사용자 정보 표시 (Display user info)
   if (containers.username && currentUser) {
     containers.username.textContent = currentUser.username;
-  }
-  if (containers.joinDate && currentUser?.joinDate) {
-    containers.joinDate.textContent = `가입일: ${new Date(currentUser.joinDate).toLocaleDateString('ko-KR')}`;
-  } else if (containers.joinDate) {
-    containers.joinDate.textContent = '가입일: -';
-  }
-
-  // 통계 표시 (Display statistics)
-  if (containers.genreCount) {
-    containers.genreCount.textContent = profile.genres?.length || 0;
   }
 
   // 선호 장르 (Favorite genres)
@@ -177,6 +165,41 @@ function displayProfileData(profile) {
   containers.dislikes.innerHTML = profile.dislikes?.length
     ? profile.dislikes.map(d => `<span class="tag">${getKoreanName('dislike', d)}</span>`).join('')
     : '<span class="profile-empty">피하고 싶은 장르 정보가 없습니다.</span>';
+
+  // VS 게임 취향 분석 결과 (VS Game Profile)
+  const vsSection = document.getElementById('profileVsSection');
+  const vsResult = document.getElementById('profileVsResult');
+
+  if (profile.vsProfile && vsSection && vsResult) {
+    vsSection.style.display = 'block';
+    const vs = profile.vsProfile;
+
+    vsResult.innerHTML = `
+      <div class="profile-vs-card">
+        <h4 class="profile-vs-title">${vs.title}</h4>
+        <p class="profile-vs-sentence">${vs.sentence}</p>
+        <div class="profile-vs-hashtags">
+          ${vs.hashtags.map(tag => `<span class="vs-hashtag">${tag}</span>`).join('')}
+        </div>
+        <div class="profile-vs-details">
+          <div class="vs-detail-item">
+            <span class="vs-detail-icon">🌍</span>
+            <span class="vs-detail-text">${vs.worldview.label} (${vs.worldview.intensity})</span>
+          </div>
+          <div class="vs-detail-item">
+            <span class="vs-detail-icon">⚡</span>
+            <span class="vs-detail-text">${vs.stimulation.label} (${vs.stimulation.intensity})</span>
+          </div>
+          <div class="vs-detail-item">
+            <span class="vs-detail-icon">🎨</span>
+            <span class="vs-detail-text">${vs.texture.temperature.label} · ${vs.texture.density.label}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (vsSection) {
+    vsSection.style.display = 'none';
+  }
 }
 
 /**
@@ -187,9 +210,7 @@ function displayEmptyProfile() {
 
   // 사용자 정보 (User info)
   const usernameEl = document.getElementById('profileUsername');
-  const joinDateEl = document.getElementById('profileJoinDate');
   if (usernameEl) usernameEl.textContent = currentUser?.username || '게스트';
-  if (joinDateEl) joinDateEl.textContent = '가입일: -';
 
   // 선호 장르 (Favorite genres)
   const genresEl = document.getElementById('profileGenres');
