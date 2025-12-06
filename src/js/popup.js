@@ -57,6 +57,10 @@ function initSurveyPopup() {
    1단계: 기본 정보 설문 (Step 1: Basic Survey)
    ============================================ */
 
+/* ============================================
+   [발표 2단계] 취향 설정 - Phase 1 (카드 선택)
+   설명: 5개 질문으로 기본 취향 수집 (장르, 무드, 탐색 스타일)
+   ============================================ */
 /**
  * 첫 번째 팝업 핸들러 설정 (카드 기반 네비게이션)
  * Setup first popup handlers with card-based navigation
@@ -142,7 +146,7 @@ function validateAndSaveQuestion(questionNum, page) {
       userProfile.genres = Array.from(selectedCards).map(card =>
         parseInt(card.dataset.value)
       );
-      break;
+      break;  
 
     case '2': // 무드
       if (selectedCards.length === 0) {

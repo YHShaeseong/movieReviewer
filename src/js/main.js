@@ -149,6 +149,10 @@ function initializeMainContent() {
   setupMainPageEvents();
 }
 
+/* ============================================
+   [발표 6단계] 영화 탐색 - 검색 & 필터
+   설명: 디바운싱으로 실시간 검색 최적화
+   ============================================ */
 /**
  * 메인 페이지 이벤트 설정
  * Setup main page event listeners
@@ -451,6 +455,10 @@ function setupEventListeners() {
    앱 시작 (Application Start)
    ============================================ */
 
+/* ============================================
+   [발표 1단계] 첫 방문 - 초기화
+   설명: localStorage에서 사용자 프로필 확인, 없으면 팝업 자동 표시
+   ============================================ */
 window.addEventListener('DOMContentLoaded', () => {
   // 개발자 모드: 초기화 (Developer mode: reset)
   const urlParams = new URLSearchParams(window.location.search);
@@ -478,7 +486,8 @@ window.addEventListener('DOMContentLoaded', () => {
       }
       initializeMainContent();
     } else {
-      // 비로그인 상태 (Not logged in state)
+      // 비로그인 상태: 프로필 없으면 팝업 자동 표시
+      // (Not logged in state: Show popup if no profile)
       popupFrame.style.display = 'block';
     }
   }
